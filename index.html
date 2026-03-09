@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byron Surf Clips - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-gray-100 p-4">
+
+    <nav class="flex justify-between items-center max-w-4xl mx-auto mb-8 bg-white p-4 rounded shadow">
+        <h1 class="font-bold italic text-xl">BYRON SURF CLIPS</h1>
+        <div id="auth-ui" class="text-sm"></div>
+    </nav>
+
+    <section id="admin-panel" class="hidden bg-white p-6 rounded-lg shadow-lg mb-10 max-w-lg mx-auto border-t-4 border-blue-600">
+        <h2 class="font-bold text-lg mb-4 text-gray-800">Crear Nueva Sesión</h2>
+        <div class="space-y-3">
+            <input type="text" id="loc" placeholder="Ubicación (ej: Main Beach)" class="w-full border p-2 rounded focus:outline-blue-500">
+            <input type="text" id="time" placeholder="Horario (ej: 08:00 - 10:30)" class="w-full border p-2 rounded focus:outline-blue-500">
+            <div class="flex flex-col">
+                <label class="text-xs text-gray-500 mb-1">Fecha de la sesión:</label>
+                <input type="date" id="date" class="w-full border p-2 rounded focus:outline-blue-500">
+            </div>
+            <button onclick="createSession()" class="w-full bg-blue-600 text-white font-bold py-2 rounded hover:bg-blue-700 transition">
+                + Crear Sesión
+            </button>
+        </div>
+    </section>
+
+    <div id="grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <p class="text-center col-span-full text-gray-500 italic">Cargando sesiones...</p>
+    </div>
+
+    <script>
+        const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
+
+        async function checkUser() {
+            const { data: { user } } = await client.auth.getUser();
+            const authDiv = document.getElementById('auth-ui');
+            const adminPanel = document.getElementById('admin-panel');
+
+            if (user) {
+                authDiv.innerHTML = `<span>${user.email}</span> <button onclick="logout()" class="text-red-600 underline ml-2">Salir</button>`;
+                if (user.email === "wildpauu@gmail.com") adminPanel.classList.remove('hidden');
+            } else {
+                authDiv.innerHTML = `<input type="email" id="login-email" placeholder="Email" class="border p-1 rounded mr-1"> <button onclick="login()" class="bg-blue-600 text-white px-3 py-1 rounded">Entrar</button>`;
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            await client.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
+            alert("Enlace enviado al correo");
+        }
+
+        async function logout() { await client.auth.signOut(); location.reload(); }
+
+        // Crear Sesión con Fecha
+        async function createSession() {
+            const loc = document.getElementById('loc').value;
+            const time = document.getElementById('time').value;
+            const date = document.getElementById('date').value;
+
+            if (!loc || !time || !date) return alert("Por favor, rellena todos los campos (incluida la fecha)");
+
+            const { error } = await client.from('sessions').insert([{ 
+                location: loc, 
+                time_range: time,
+                date: date // Asegúrate de tener esta columna en Supabase
+            }]);
+
+            if (error) alert("Error de RLS/Permisos: " + error.message);
+            else location.reload();
+        }
+
+        async function uploadPhoto(sessionId, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fileName = `${sessionId}/${Date.now()}_${file.name}`;
+            const { error: upError } = await client.storage.from('clips').upload(fileName, file);
+            if (upError) return alert("Error subida: " + upError.message);
+            const { data: { publicUrl } } = client.storage.from('clips').getPublicUrl(fileName);
+            await client.from('sessions').update({ cover_url: publicUrl }).eq('id', sessionId);
+            location.reload();
+        }
+
+        async function loadSessions() {
+            // Ordenamos por fecha para que las más recientes salgan primero
+            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
+            const grid = document.getElementById('grid');
+            if (error) return grid.innerHTML = "Error cargando datos.";
+
+            grid.innerHTML = data.map(s => `
+                <div class="bg-white p-5 rounded-lg shadow border border-gray-200">
+                    <div class="relative group mb-4">
+                        <img src="${s.cover_url || 'https://via.placeholder.com/400x200?text=Sin+Foto'}" class="w-full h-48 object-cover rounded">
+                        <label class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition cursor-pointer rounded text-white font-bold">
+                            Cambiar Foto <input type="file" class="hidden" onchange="uploadPhoto('${s.id}', event)">
+                        </label>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-bold text-lg">${s.location}</h3>
+                            <p class="text-gray-500 text-sm">${s.time_range}</p>
+                        </div>
+                        <span class="bg-blue-50 text-blue-700 text-xs font-bold px-2 py-1 rounded">${s.date || ''}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        checkUser();
+        loadSessions();
+    </script>
+</body>
+</html>
