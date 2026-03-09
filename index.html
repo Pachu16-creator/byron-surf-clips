@@ -12,40 +12,30 @@
 
     <nav class="bg-white p-4 shadow-md flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-b-2xl">
         <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="location.reload()">BYRON SURF CLIPS</h1>
-        <div id="auth-ui" class="flex items-center">
-            </div>
+        <div id="auth-ui" class="flex items-center"></div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-4">
-        
         <div id="view-sessions">
             <section id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-sm mb-10 border-2 border-dashed border-blue-200">
                 <h2 class="font-bold mb-4 text-blue-800">Crear Nueva Sesión (Admin)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <input type="text" id="loc" placeholder="Ubicación" class="border p-2 rounded-lg text-sm">
-                    <input type="text" id="time" placeholder="Horario (08:00 - 10:00)" class="border p-2 rounded-lg text-sm">
+                    <input type="text" id="time" placeholder="Horario" class="border p-2 rounded-lg text-sm">
                     <input type="date" id="date" class="border p-2 rounded-lg text-sm">
                     <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700 transition">Publicar</button>
                 </div>
             </section>
-
             <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
         </div>
 
         <div id="view-gallery" class="hidden">
-            <button onclick="showSessions()" class="mb-6 flex items-center text-blue-600 font-bold hover:underline">
-                ← Volver a Sesiones
-            </button>
-            
+            <button onclick="showSessions()" class="mb-6 flex items-center text-blue-600 font-bold hover:underline">← Volver</button>
             <div id="gallery-header" class="mb-8"></div>
-            
             <div id="admin-upload" class="hidden bg-blue-50 p-8 rounded-3xl mb-10 text-center border-2 border-blue-200 border-dashed">
                 <input type="file" id="bulk-upload" multiple class="hidden" onchange="handleBulkUpload(event)">
-                <label for="bulk-upload" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-blue-700 shadow-lg">
-                    Subir Fotos a esta Sesión
-                </label>
+                <label for="bulk-upload" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-blue-700">Subir Fotos</label>
             </div>
-
             <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
         </div>
     </main>
@@ -63,7 +53,7 @@
             if (isAdmin) {
                 authDiv.innerHTML = `
                     <span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full mr-3 shadow">MODO ADMIN</span>
-                    <button onclick="client.auth.signOut(); location.reload()" class="text-xs text-gray-500 underline">Salir</button>
+                    <button onclick="logout()" class="text-xs text-gray-500 underline font-bold">Salir</button>
                 `;
                 document.getElementById('admin-panel').classList.remove('hidden');
             } else {
@@ -71,31 +61,37 @@
                     <span class="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full mr-3 shadow">MODO INVITADO</span>
                     <button onclick="login()" class="text-sm bg-blue-100 text-blue-700 px-4 py-1 rounded-full font-bold">Admin Login</button>
                 `;
+                document.getElementById('admin-panel').classList.add('hidden');
             }
             loadSessions();
+        }
+
+        // NUEVA FUNCIÓN DE SALIDA MEJORADA
+        async function logout() {
+            await client.auth.signOut();
+            // Limpieza manual por si el navegador se queda "pegado"
+            localStorage.removeItem('sb-gmyptbfrpspzmyucqumz-auth-token'); 
+            window.location.reload();
         }
 
         async function login() {
             const email = prompt("Email de Admin:");
             if(!email) return;
-            await client.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.href } });
-            alert("Enlace enviado a tu email.");
+            await client.auth.signInWithOtp({ email });
+            alert("Revisa tu email para el enlace de acceso.");
         }
 
         async function createSession() {
             const loc = document.getElementById('loc').value;
-            const time = document.getElementById('time').value;
             const date = document.getElementById('date').value;
             if(!loc || !date) return alert("Falta Ubicación o Fecha");
-
-            await client.from('sessions').insert([{ location: loc, time_range: time, date: date }]);
+            await client.from('sessions').insert([{ location: loc, time_range: document.getElementById('time').value, date: date }]);
             location.reload();
         }
 
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             const grid = document.getElementById('sessions-grid');
-            
             grid.innerHTML = (data || []).map(s => `
                 <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100 relative group">
                     <div onclick="openGallery('${s.id}', '${s.location}')" class="cursor-pointer">
@@ -108,13 +104,7 @@
                             </div>
                         </div>
                     </div>
-                    ${isAdmin ? `
-                        <div class="absolute top-3 right-3">
-                            <label class="bg-black/70 text-white px-3 py-1 rounded-lg text-xs cursor-pointer hover:bg-black transition shadow-lg">
-                                Editar Portada <input type="file" class="hidden" onchange="updateCover('${s.id}', event)">
-                            </label>
-                        </div>
-                    ` : ''}
+                    ${isAdmin ? `<div class="absolute top-3 right-3"><label class="bg-black/70 text-white px-3 py-1 rounded-lg text-xs cursor-pointer shadow-lg">Editar Portada <input type="file" class="hidden" onchange="updateCover('${s.id}', event)"></label></div>` : ''}
                 </div>
             `).join('');
         }
@@ -130,58 +120,43 @@
         }
 
         function openGallery(id, title) {
-            currentSessionId = id; // Guardamos el ID globalmente
+            currentSessionId = id;
             document.getElementById('view-sessions').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerHTML = `<h2 class="text-3xl font-black text-blue-900">${title}</h2>`;
             if (isAdmin) document.getElementById('admin-upload').classList.remove('hidden');
-            loadPhotos(); // Cargamos las fotos de la sesión actual
+            loadPhotos();
         }
 
         async function loadPhotos() {
-            if (!currentSessionId) return;
-            const { data, error } = await client.from('photos').select('*').eq('session_id', currentSessionId);
-            
+            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             const grid = document.getElementById('photos-grid');
-            if (error) {
-                console.error("Error cargando fotos:", error);
-                return;
-            }
-
             grid.innerHTML = (data || []).map(p => `
-                <div class="relative group rounded-2xl overflow-hidden shadow-md bg-gray-200 aspect-square">
+                <div class="relative group rounded-2xl overflow-hidden shadow-md aspect-square bg-gray-200">
                     <img src="${p.url_watermarked || p.url_original}" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center p-4">
                         <button onclick="window.open('https://stripe.com', '_blank')" class="bg-white text-black px-6 py-2 rounded-full font-bold text-sm shadow-xl hover:scale-105 transition">Comprar $5</button>
                         ${isAdmin ? `<button onclick="deletePhoto('${p.id}')" class="mt-4 text-xs text-red-200 underline">Borrar Foto</button>` : ''}
                     </div>
                 </div>
-            `).join('') || '<p class="col-span-full text-center py-10 text-gray-400">No hay fotos en esta sesión aún.</p>';
+            `).join('') || '<p class="col-span-full text-center py-10 text-gray-400">No hay fotos todavía.</p>';
         }
 
         async function handleBulkUpload(event) {
             const files = event.target.files;
-            if (!files.length || !currentSessionId) return;
-            
-            alert("Subiendo fotos... Por favor espera.");
+            if (!files.length) return;
+            alert("Subiendo...");
             for (let file of files) {
                 const fileName = `photos/${currentSessionId}/${Date.now()}_${file.name}`;
                 await client.storage.from('clips').upload(fileName, file);
                 const { data } = client.storage.from('clips').getPublicUrl(fileName);
-                await client.from('photos').insert([{ 
-                    session_id: currentSessionId, 
-                    url_original: data.publicUrl, 
-                    url_watermarked: data.publicUrl 
-                }]);
+                await client.from('photos').insert([{ session_id: currentSessionId, url_original: data.publicUrl, url_watermarked: data.publicUrl }]);
             }
             loadPhotos();
         }
 
         async function deletePhoto(photoId) {
-            if (confirm("¿Borrar foto?")) {
-                await client.from('photos').delete().eq('id', photoId);
-                loadPhotos();
-            }
+            if (confirm("¿Borrar?")) { await client.from('photos').delete().eq('id', photoId); loadPhotos(); }
         }
 
         function showSessions() {
