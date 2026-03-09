@@ -7,11 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen pb-20">
 
-    <nav class="bg-white p-4 shadow-md flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-b-2xl">
+    <nav class="bg-white p-4 shadow-md flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-b-2xl sticky top-0 z-40">
         <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="location.reload()">BYRON SURF CLIPS</h1>
-        <div id="auth-ui" class="flex items-center gap-2"></div>
+        <div id="auth-ui" class="flex items-center gap-2">
+            <input type="email" id="email" placeholder="Email" class="border p-1 rounded text-xs w-32">
+            <input type="password" id="pass" placeholder="Password" class="border p-1 rounded text-xs w-32">
+            <button onclick="login()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Login</button>
+        </div>
     </nav>
 
     <main class="max-w-6xl mx-auto p-4">
@@ -19,7 +23,7 @@
             <h2 class="font-bold mb-4 text-blue-800">Crear Nueva Sesión</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <input type="text" id="loc" placeholder="Ubicación" class="border p-2 rounded-lg text-sm">
-                <input type="text" id="time_range" placeholder="Horario (ej: 8am-10am)" class="border p-2 rounded-lg text-sm">
+                <input type="text" id="time_range" placeholder="Horario" class="border p-2 rounded-lg text-sm">
                 <input type="date" id="date" class="border p-2 rounded-lg text-sm">
                 <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Publicar</button>
             </div>
@@ -29,7 +33,7 @@
 
         <div id="view-gallery" class="hidden">
             <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold hover:underline">← Volver</button>
-            <div id="gallery-header" class="mb-8"></div>
+            <h2 id="gallery-header" class="text-3xl font-black mb-8"></h2>
             <div id="admin-upload" class="hidden bg-blue-50 p-8 rounded-3xl mb-10 text-center border-2 border-dashed border-blue-200">
                 <input type="file" id="bulk-upload" multiple class="hidden" onchange="handleBulkUpload(event)">
                 <label for="bulk-upload" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-blue-700">Subir Fotos</label>
@@ -38,99 +42,45 @@
         </div>
     </main>
 
-    <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeLightbox()">
-        <div class="relative">
-            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
-            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-        </div>
-        <button class="absolute top-5 right-5 text-white text-3xl">✕</button>
+    <div id="cart-bar" class="hidden fixed bottom-6 left-6 right-6 bg-blue-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-50">
+        <span id="cart-count" class="font-bold">0 fotos seleccionadas</span>
+        <button onclick="checkout()" class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-xl font-black">COMPRAR</button>
     </div>
 
     
 
     <script>
         const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
-        let isAdmin = false; let currentSessionId = null;
+        let isAdmin = false; let currentSessionId = null; let cart = [];
+
+        async function login() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('pass').value;
+            const { error } = await client.auth.signInWithPassword({ email, password: pass });
+            if (error) alert(error.message); else location.reload();
+        }
 
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
-            isAdmin = (user?.email === "wildpauu@gmail.com");
-            if (isAdmin) { 
+            if (user?.email === "wildpauu@gmail.com") {
+                isAdmin = true;
                 document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('auth-ui').innerHTML = `
-                    <span class="bg-red-600 text-white text-xs px-2 py-1 rounded">ADMIN</span>
-                    <button onclick="logout()" class="text-xs bg-gray-200 px-2 py-1 rounded">Salir</button>
-                `;
+                document.getElementById('auth-ui').innerHTML = `<span class="text-xs text-green-600">Admin</span> <button onclick="logout()" class="text-xs text-red-500">Salir</button>`;
             }
             loadSessions();
         }
 
         async function logout() { await client.auth.signOut(); location.reload(); }
 
-        // Función corregida: elige archivo local y sube automáticamente
-        async function updateCover(id) {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                const fileName = `covers/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-                await client.storage.from('clips').upload(fileName, file);
-                const publicUrl = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${fileName}`;
-                await client.from('sessions').update({ cover_url: publicUrl }).eq('id', id);
-                location.reload();
-            };
-            input.click();
-        }
-
-        async function createSession() {
-            const { error } = await client.from('sessions').insert([{
-                location: document.getElementById('loc').value,
-                time_range: document.getElementById('time_range').value,
-                date: document.getElementById('date').value
-            }]);
-            if (error) alert("Error: " + error.message); else location.reload();
-        }
-
+        // --- Funciones de Sesión y Galería ---
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
-                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border">
-                    <div class="cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
-                        <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
-                        <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
-                    </div>
-                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 hover:bg-blue-50 border-t">Cambiar Portada</button>` : ''}
+                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
+                    <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
+                    <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
                 </div>
             `).join('');
-        }
-
-        async function loadPhotos() {
-            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
-            const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
-            document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
-                <div class="relative rounded-2xl overflow-hidden aspect-square cursor-pointer" onclick="openLightbox('${p.url_watermarked}')">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover">
-                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-                </div>
-            `).join('');
-        }
-
-        async function handleBulkUpload(event) {
-            const files = event.target.files;
-            alert("Subiendo fotos...");
-            for (let file of files) {
-                const name = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
-                await client.storage.from('clips').upload(`originals/${name}`, file);
-                await client.storage.from('clips').upload(`watermarked/${name}`, file);
-                await client.from('photos').insert([{ 
-                    session_id: currentSessionId, 
-                    url_original: `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/originals/${name}`, 
-                    url_watermarked: `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermarked/${name}` 
-                }]);
-            }
-            loadPhotos();
         }
 
         function openGallery(id, title) {
@@ -138,13 +88,35 @@
             document.getElementById('sessions-grid').classList.add('hidden');
             document.getElementById('admin-panel').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
-            document.getElementById('gallery-header').innerHTML = `<h2 class="text-3xl font-black">${title}</h2>`;
+            document.getElementById('gallery-header').innerText = title;
             if (isAdmin) document.getElementById('admin-upload').classList.remove('hidden');
             loadPhotos();
         }
 
-        function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
-        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        async function loadPhotos() {
+            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
+            document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
+                <div class="relative rounded-2xl overflow-hidden aspect-square cursor-pointer transition" onclick="toggleSelect('${p.url_watermarked}', this)">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/20 hover:bg-black/0 transition"></div>
+                </div>
+            `).join('');
+        }
+
+        function toggleSelect(url, element) {
+            if (cart.includes(url)) {
+                cart = cart.filter(item => item !== url);
+                element.classList.remove('ring-4', 'ring-blue-500');
+            } else {
+                cart.push(url);
+                element.classList.add('ring-4', 'ring-blue-500');
+            }
+            document.getElementById('cart-bar').classList.toggle('hidden', cart.length === 0);
+            document.getElementById('cart-count').innerText = `${cart.length} fotos seleccionadas`;
+        }
+
+        function checkout() { alert("Procesando pago de " + cart.length + " fotos..."); }
+
         function showSessions() { location.reload(); }
         
         checkUser();
