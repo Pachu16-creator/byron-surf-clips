@@ -6,134 +6,279 @@
     <title>Byron Surf Clips</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>.hero-bg { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; }</style>
+    <style>
+        .hero-bg { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col">
+<body class="bg-gray-100 min-h-screen flex flex-col relative">
 
     <section id="landing-page" class="hero-bg h-screen flex flex-col items-center justify-center text-center p-6 text-white">
         <nav class="absolute top-0 w-full p-6 flex justify-between items-center max-w-6xl">
-            <h1 class="font-black italic text-2xl">BYRON SURF CLIPS</h1>
+            <h1 class="font-black italic text-2xl tracking-tighter">BYRON SURF CLIPS</h1>
             <div class="flex gap-6 font-bold text-sm">
-                <button onclick="goToSessions()" class="hover:text-blue-400">FIND MY SHOT</button>
-                <button onclick="showPacks()" class="hover:text-blue-400">PACKS</button>
+                <button onclick="goToSessions()" class="hover:text-blue-400 uppercase">Find My Shot</button>
+                <button onclick="showPacks()" class="hover:text-blue-400 uppercase">Packs</button>
             </div>
         </nav>
-        <h1 class="text-6xl font-black italic mb-6">CAPTURE THE WAVE</h1>
-        <button onclick="goToSessions()" class="bg-blue-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-blue-500 transition">View Sessions</button>
+        <h1 class="text-7xl font-black italic mb-6 tracking-tighter">CAPTURE THE WAVE</h1>
+        <p class="text-xl mb-10 max-w-lg opacity-90 font-medium">High-quality surf photography from the heart of Byron Bay.</p>
+        <button onclick="goToSessions()" class="bg-blue-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-500 transition-all shadow-xl">View Sessions</button>
     </section>
 
-    <section id="sessions-page" class="hidden flex-grow pt-10 px-4">
-        <nav class="max-w-6xl mx-auto flex justify-between items-center mb-8 bg-white p-4 rounded-2xl shadow-sm">
-            <h1 class="font-black text-2xl text-blue-900 cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
-            <div id="auth-ui" class="flex gap-2">
-                <input type="email" id="email" placeholder="Email for Magic Link" class="border p-2 rounded-lg text-sm">
-                <button onclick="login()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold">Login</button>
+    <section id="sessions-page" class="hidden flex-grow pt-10">
+        <nav class="bg-white/80 backdrop-blur-md p-4 shadow-sm flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-2xl sticky top-4 z-40 border border-gray-100">
+            <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
+            <div class="flex items-center gap-4">
+                <div id="auth-ui" class="flex gap-2 items-center">
+                    <input type="email" id="login-email" placeholder="Email for Magic Link" class="border p-2 rounded-lg text-xs w-32 md:w-48">
+                    <button onclick="login()" class="bg-gray-900 text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-gray-700">Login</button>
+                </div>
+                <button onclick="toggleCartModal()" class="font-bold text-blue-600 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 flex items-center gap-2">
+                    🛒 Cart (<span id="cart-count">0</span>)
+                </button>
             </div>
-            <button onclick="toggleCartModal()">🛒 Cart (<span id="cart-count">0</span>)</button>
         </nav>
-        
-        <main class="max-w-6xl mx-auto">
-            <div id="admin-panel" class="hidden bg-yellow-50 p-6 rounded-2xl mb-8 border-2 border-yellow-200">
-                <h2 class="font-bold text-yellow-800">Admin Mode</h2>
-                <input type="text" id="loc" placeholder="Location" class="border p-2 rounded">
-                <button onclick="createSession()" class="bg-green-600 text-white px-4 py-2 rounded">Create Session</button>
-            </div>
-            
+
+        <main class="max-w-6xl mx-auto p-4">
+            <section id="admin-panel" class="hidden bg-white p-6 rounded-3xl shadow-lg mb-10 border-2 border-dashed border-blue-300">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-black text-xl text-blue-800 uppercase italic">Admin: New Session</h2>
+                    <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Authorized</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input type="text" id="new-loc" placeholder="Location (e.g. Wategos)" class="border p-3 rounded-xl text-sm outline-blue-500">
+                    <input type="text" id="new-time" placeholder="Time range (e.g. 6am - 8am)" class="border p-3 rounded-xl text-sm outline-blue-500">
+                    <input type="date" id="new-date" class="border p-3 rounded-xl text-sm outline-blue-500">
+                    <button onclick="createSession()" class="bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">Publish Session</button>
+                </div>
+            </section>
+
             <div id="sessions-grid-container">
-                <input type="text" id="filter-loc" placeholder="Filter location..." class="w-full p-3 rounded-xl border mb-8" onkeyup="filterSessions()">
+                <section class="bg-white p-4 rounded-3xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-50">
+                    <span class="font-bold text-gray-400 text-sm ml-2">FILTER BY:</span>
+                    <input type="text" id="filter-loc" placeholder="Location..." class="bg-gray-50 p-2 px-4 rounded-xl flex-1 outline-none focus:ring-2 focus:ring-blue-100" onkeyup="filterSessions()">
+                    <input type="date" id="filter-date" class="bg-gray-50 p-2 px-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100" onchange="filterSessions()">
+                </section>
                 <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
             
             <div id="view-gallery" class="hidden">
-                <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold">← Back to Sessions</button>
-                <h2 id="gallery-header" class="text-3xl font-black mb-8"></h2>
-                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+                <div class="flex items-center gap-4 mb-8">
+                    <button onclick="showSessions()" class="bg-white p-3 rounded-2xl shadow-sm hover:shadow-md transition text-blue-600">←</button>
+                    <h2 id="gallery-header" class="text-4xl font-black italic text-gray-900"></h2>
+                </div>
+                
+                <div id="admin-upload-area" class="hidden bg-blue-50 p-10 rounded-[2.5rem] mb-12 text-center border-4 border-dashed border-blue-200">
+                    <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
+                    <label for="bulk-files" class="bg-blue-600 text-white px-10 py-4 rounded-full font-black cursor-pointer hover:bg-blue-700 transition inline-block">UPLOAD NEW PHOTOS</label>
+                    <p class="text-blue-400 mt-4 text-sm font-medium">Select multiple images to upload to this session</p>
+                </div>
+                
+                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </main>
     </section>
 
-    <section id="packs-page" class="hidden flex-grow pt-20 p-6">
-        <h2 class="text-4xl font-black text-center mb-10">Photo Packs</h2>
+    <section id="packs-page" class="hidden flex-grow pt-24 p-6">
+        <h2 class="text-5xl font-black italic text-center mb-4 text-blue-900">PHOTO PACKS</h2>
+        <p class="text-center text-gray-500 mb-12 font-medium">Save more when you buy more photos together.</p>
         <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"></div>
-        <button onclick="backToHome()" class="mt-10 block mx-auto text-blue-600 font-bold">← Back Home</button>
+        <button onclick="backToHome()" class="mt-12 block mx-auto text-blue-600 font-bold hover:underline uppercase tracking-widest text-sm">← Back to Main</button>
     </section>
 
-    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4">
-        <button onclick="prevPhoto()" class="absolute left-4 text-white text-5xl">❮</button>
-        <div class="relative">
-            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
-            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+        <div class="bg-white w-full max-w-md h-full p-8 overflow-y-auto flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black italic">YOUR CART</h2>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black text-2xl">✕</button>
+            </div>
+            <div id="cart-items" class="grid grid-cols-2 gap-4 flex-grow content-start overflow-y-auto pr-2 no-scrollbar"></div>
+            <div class="pt-6 border-t mt-6">
+                <button onclick="checkout()" class="w-full bg-blue-600 text-white font-black py-5 rounded-2xl hover:bg-blue-700 transition shadow-lg shadow-blue-200 uppercase tracking-widest">Proceed to Checkout</button>
+            </div>
         </div>
-        <button onclick="nextPhoto()" class="absolute right-4 text-white text-5xl">❯</button>
-        <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl">✕</button>
+    </div>
+
+    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
+        <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
+        <div class="relative max-w-5xl w-full flex justify-center">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain">
+        </div>
+        <button onclick="nextPhoto()" class="absolute right-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
     </div>
 
     <script>
-        // 1. Sustituye TU_ANON_KEY_AQUI por la clave real de tu proyecto Supabase
-        const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqUI');
+        // CONFIG - ADD YOUR REAL KEYS HERE
+        const SUPA_URL = 'https://gmyptbfrpspzmyucqumz.supabase.co';
+        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
+        const client = supabase.createClient(SUPA_URL, SUPA_KEY);
         
-        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false;
         const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
+        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null;
 
-        // CORE FUNCTIONS
-        function hideAll() { document.getElementById('landing-page').classList.add('hidden'); document.getElementById('sessions-page').classList.add('hidden'); document.getElementById('packs-page').classList.add('hidden'); }
-        function goToSessions() { hideAll(); document.getElementById('sessions-page').classList.remove('hidden'); loadSessions(); }
-        function showPacks() { hideAll(); document.getElementById('packs-page').classList.remove('hidden'); loadPacks(); }
-        function backToHome() { hideAll(); document.getElementById('landing-page').classList.remove('hidden'); }
-        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
-
-        // AUTH
-        async function login() {
-            const email = document.getElementById('email').value;
-            const { error } = await client.auth.signInWithOtp({ email });
-            if (error) alert(error.message); else alert("Check your email for the magic link!");
-        }
-
+        // AUTH SYSTEM
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
-            if (user?.email === "wildpauu@gmail.com") {
-                isAdmin = true;
-                document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('auth-ui').innerHTML = `<span class="text-green-600 font-bold text-sm">ADMIN</span>`;
+            const authUi = document.getElementById('auth-ui');
+            if (user) {
+                if (user.email === "wildpauu@gmail.com") {
+                    isAdmin = true;
+                    document.getElementById('admin-panel').classList.remove('hidden');
+                }
+                authUi.innerHTML = `<span class="text-xs font-bold text-blue-900 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">${user.email}</span> 
+                                   <button onclick="logout()" class="text-xs text-red-500 font-bold hover:underline">Sign Out</button>`;
             }
         }
 
-        // SESSIONS
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            if(!email) return alert("Enter email first");
+            const { error } = await client.auth.signInWithOtp({ email });
+            if (!error) alert("Magic link sent! Check your inbox.");
+            else alert(error.message);
+        }
+
+        async function logout() { await client.auth.signOut(); location.reload(); }
+
+        // NAVIGATION
+        function hideAll() { 
+            ['landing-page', 'sessions-page', 'packs-page'].forEach(id => document.getElementById(id).classList.add('hidden')); 
+        }
+        function goToSessions() { hideAll(); document.getElementById('sessions-page').classList.remove('hidden'); showSessions(); loadSessions(); }
+        function showPacks() { hideAll(); document.getElementById('packs-page').classList.remove('hidden'); loadPacks(); }
+        function backToHome() { hideAll(); document.getElementById('landing-page').classList.remove('hidden'); }
+        function showSessions() { 
+            document.getElementById('view-gallery').classList.add('hidden'); 
+            document.getElementById('sessions-grid-container').classList.remove('hidden'); 
+        }
+
+        // SESSIONS LOGIC
         async function loadSessions() {
-            const { data, error } = await client.from('sessions').select('*');
-            if (error) { console.error("Error loading sessions:", error); return; }
+            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
+            if (error) { console.error("Error 401: Key invalid or RLS blocked.", error); return; }
             sessions = data || [];
-            document.getElementById('sessions-grid').innerHTML = sessions.map(s => `
-                <div class="bg-white rounded-3xl border cursor-pointer p-5" onclick="openGallery('${s.id}', '${s.location}')">
-                    <h3 class="font-black text-xl">${s.location}</h3>
-                    <p class="text-blue-600">${s.time_range || ''}</p>
-                    <p class="text-gray-500 text-sm">${s.date || ''}</p>
+            renderSessions(sessions);
+        }
+
+        function renderSessions(list) {
+            document.getElementById('sessions-grid').innerHTML = list.map(s => `
+                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300" onclick="openGallery('${s.id}', '${s.location}')">
+                    <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-56 object-cover">
+                    <div class="p-6">
+                        <h3 class="font-black text-2xl text-gray-900">${s.location}</h3>
+                        <div class="flex items-center gap-2 mt-2">
+                            <span class="bg-blue-50 text-blue-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">${s.time_range || 'Morning'}</span>
+                            <span class="text-gray-400 text-xs font-bold">${s.date || ''}</span>
+                        </div>
+                    </div>
                 </div>`).join('');
         }
 
+        function filterSessions() {
+            const loc = document.getElementById('filter-loc').value.toLowerCase();
+            const date = document.getElementById('filter-date').value;
+            renderSessions(sessions.filter(s => s.location.toLowerCase().includes(loc) && (!date || s.date === date)));
+        }
+
+        async function createSession() {
+            if(!isAdmin) return;
+            const location = document.getElementById('new-loc').value;
+            const time_range = document.getElementById('new-time').value;
+            const date = document.getElementById('new-date').value;
+            const { error } = await client.from('sessions').insert([{ location, time_range, date }]);
+            if (!error) { alert("Session published!"); loadSessions(); }
+        }
+
+        // GALLERY & UPLOAD
         async function openGallery(id, title) {
+            currentSessionId = id;
             document.getElementById('sessions-grid-container').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
-            const { data } = await client.from('photos').select('*').eq('session_id', id);
+            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
+            loadPhotos();
+        }
+
+        async function loadPhotos() {
+            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             currentPhotos = data || [];
             document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
-                <div class="relative aspect-square">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox(${i})">
-                    <input type="checkbox" class="absolute top-2 left-2 w-6 h-6" onchange="toggleCart('${p.url_watermarked}', this)">
+                <div class="relative group rounded-2xl overflow-hidden aspect-square border shadow-sm">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500" onclick="openLightbox(${i})">
+                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+                    <div class="absolute top-3 left-3 bg-white/90 p-1 rounded-lg border shadow-sm">
+                        <input type="checkbox" class="w-6 h-6 cursor-pointer" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.includes(p.url_watermarked) ? 'checked' : ''}>
+                    </div>
                 </div>`).join('');
         }
 
-        // LIGHTBOX
-        function openLightbox(i) { currentIndex = i; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; document.getElementById('lightbox').classList.remove('hidden'); }
-        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
-        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
-        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        async function handleBulkUpload(event) {
+            const files = event.target.files;
+            if (!files.length || !isAdmin) return;
+            alert(`Uploading ${files.length} photos. Don't close the browser.`);
+            for (let file of files) {
+                const fName = `${Date.now()}-${file.name}`;
+                const { data } = await client.storage.from('clips').upload(`watermarked/${fName}`, file);
+                if (data) {
+                    const url = `${SUPA_URL}/storage/v1/object/public/clips/watermarked/${fName}`;
+                    await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
+                }
+            }
+            loadPhotos();
+        }
 
-        // INIT
+        // CART & CHECKOUT
+        function toggleCart(url, el) {
+            if(el.checked) cart.push(url); else cart = cart.filter(i => i !== url);
+            document.getElementById('cart-count').innerText = cart.length;
+            renderCart();
+        }
+
+        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
+
+        function renderCart() {
+            document.getElementById('cart-items').innerHTML = cart.map(url => `
+                <div class="relative rounded-xl overflow-hidden aspect-square border border-gray-100 shadow-sm">
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
+                </div>`).join('');
+        }
+
+        async function checkout() {
+            if(!cart.length) return alert("Cart is empty");
+            const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+                body: JSON.stringify({ photos: cart })
+            });
+            const data = await res.json();
+            if(data.url) window.location.href = data.url; else alert("Checkout error");
+        }
+
+        // LIGHTBOX
+        function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
+        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
+        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
+
+        // PACKS
+        async function loadPacks() {
+            const { data } = await client.from('packs').select('*').order('id');
+            document.getElementById('packs-container').innerHTML = (data || []).map(p => `
+                <div class="bg-[#1a2432] p-10 rounded-[2.5rem] text-center text-white border border-white/5 shadow-2xl">
+                    <h3 class="text-2xl font-black italic mb-2 tracking-tight">${p.name}</h3>
+                    <p class="text-blue-400 text-xs font-bold mb-6">${p.photos_count} PHOTOS INCLUDED</p>
+                    <div class="text-5xl font-black mb-8">$${p.price}<span class="text-sm font-normal text-gray-500 ml-1">AUD</span></div>
+                    <button onclick="goToSessions()" class="bg-blue-600 w-full py-4 rounded-2xl font-black hover:bg-blue-500 transition shadow-lg shadow-blue-900/40">GET THIS PACK</button>
+                </div>`).join('');
+        }
+
+        // BOOTSTRAP
         checkUser();
-        loadSessions();
     </script>
 </body>
 </html>
-
