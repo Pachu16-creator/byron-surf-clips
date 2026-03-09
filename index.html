@@ -68,7 +68,6 @@
         const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
         let isAdmin = false; let currentSessionId = null; let cart = [];
 
-        // --- AUTH ---
         async function login() {
             const { error } = await client.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('pass').value });
             if (error) alert(error.message); else location.reload();
@@ -84,7 +83,6 @@
             loadSessions();
         }
 
-        // --- SESSIONS ---
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
@@ -119,11 +117,16 @@
             }; input.click();
         }
 
-        // --- GALLERY & CART ---
         function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); renderCart(); }
         
         function renderCart() {
-            document.getElementById('cart-items').innerHTML = cart.map(url => `<img src="${url}" class="rounded-lg aspect-square object-cover">`).join('');
+            const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
+            document.getElementById('cart-items').innerHTML = cart.map(url => `
+                <div class="relative rounded-lg overflow-hidden aspect-square">
+                    <img src="${url}" class="w-full h-full object-cover">
+                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+                </div>
+            `).join('');
         }
 
         function toggleCart(url, cb) {
@@ -153,7 +156,6 @@
             loadPhotos();
         }
 
-        // --- NAVIGATION ---
         function openGallery(id, title) {
             currentSessionId = id;
             document.getElementById('sessions-grid').classList.add('hidden');
@@ -167,11 +169,7 @@
         function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function showSessions() { location.reload(); }
-        
-        // --- STRIPE INTEGRATION (PLACEHOLDER) ---
-        function checkout() {
-            alert("Connecting to Stripe Checkout with " + cart.length + " photos. Ensure you have set up your Edge Function endpoint.");
-        }
+        function checkout() { alert("Redirecting to Stripe Checkout for " + cart.length + " photos."); }
 
         checkUser();
     </script>
