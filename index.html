@@ -48,7 +48,6 @@
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
             isAdmin = (user?.email === "wildpauu@gmail.com");
-            
             const authDiv = document.getElementById('auth-ui');
             if (isAdmin) {
                 authDiv.innerHTML = `<span class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full mr-3 shadow">MODO ADMIN</span><button onclick="logout()" class="text-xs text-gray-500 underline font-bold">Salir</button>`;
@@ -60,54 +59,21 @@
             loadSessions();
         }
 
-        async function logout() {
-            await client.auth.signOut();
-            localStorage.removeItem('sb-gmyptbfrpspzmyucqumz-auth-token'); 
-            window.location.reload();
-        }
-
-        async function login() {
-            const email = prompt("Email de Admin:");
-            if(!email) return;
-            await client.auth.signInWithOtp({ email });
-            alert("Revisa tu email para el enlace de acceso.");
-        }
-
-        async function createSession() {
-            const loc = document.getElementById('loc').value;
-            const date = document.getElementById('date').value;
-            if(!loc || !date) return alert("Falta Ubicación o Fecha");
-            await client.from('sessions').insert([{ location: loc, time_range: document.getElementById('time').value, date: date }]);
-            location.reload();
-        }
-
-        // Función para eliminar sesión
-        async function deleteSession(id) {
-            if (!confirm("¿Borrar esta sesión y todas sus fotos?")) return;
-            await client.from('sessions').delete().eq('id', id);
-            location.reload();
-        }
+        async function logout() { await client.auth.signOut(); localStorage.removeItem('sb-gmyptbfrpspzmyucqumz-auth-token'); window.location.reload(); }
+        async function login() { const email = prompt("Email de Admin:"); if(!email) return; await client.auth.signInWithOtp({ email }); alert("Revisa tu email."); }
+        async function createSession() { const loc = document.getElementById('loc').value; const date = document.getElementById('date').value; if(!loc || !date) return alert("Falta Ubicación o Fecha"); await client.from('sessions').insert([{ location: loc, time_range: document.getElementById('time').value, date: date }]); location.reload(); }
+        async function deleteSession(id) { if (!confirm("¿Borrar sesión?")) return; await client.from('sessions').delete().eq('id', id); location.reload(); }
 
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
-            const grid = document.getElementById('sessions-grid');
-            grid.innerHTML = (data || []).map(s => `
+            document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
                 <div class="bg-white rounded-3xl shadow-sm overflow-hidden border border-gray-100 relative group">
                     <div onclick="openGallery('${s.id}', '${s.location}')" class="cursor-pointer">
                         <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?w=600'}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
-                        <div class="p-5">
-                            <h3 class="font-black text-xl text-gray-800">${s.location}</h3>
-                            <div class="flex justify-between mt-3 text-sm font-bold text-gray-500 border-t pt-3">
-                                <span>📅 ${s.date}</span>
-                                <span>⏰ ${s.time_range || 'Todo el día'}</span>
-                            </div>
-                        </div>
+                        <div class="p-5"><h3 class="font-black text-xl text-gray-800">${s.location}</h3>
+                        <div class="flex justify-between mt-3 text-sm font-bold text-gray-500 border-t pt-3"><span>📅 ${s.date}</span><span>⏰ ${s.time_range || 'Todo el día'}</span></div></div>
                     </div>
-                    ${isAdmin ? `
-                        <div class="absolute top-3 right-3 flex flex-col gap-2">
-                            <label class="bg-black/70 text-white px-3 py-1 rounded-lg text-xs cursor-pointer shadow-lg">Editar Portada <input type="file" class="hidden" onchange="updateCover('${s.id}', event)"></label>
-                            <button onclick="deleteSession('${s.id}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs shadow-lg">Borrar Sesión</button>
-                        </div>` : ''}
+                    ${isAdmin ? `<div class="absolute top-3 right-3 flex flex-col gap-2"><label class="bg-black/70 text-white px-3 py-1 rounded-lg text-xs cursor-pointer shadow-lg">Editar Portada <input type="file" class="hidden" onchange="updateCover('${s.id}', event)"></label><button onclick="deleteSession('${s.id}')" class="bg-red-600 text-white px-3 py-1 rounded-lg text-xs shadow-lg">Borrar</button></div>` : ''}
                 </div>
             `).join('');
         }
@@ -115,10 +81,10 @@
         async function updateCover(sessionId, event) {
             const file = event.target.files[0];
             if (!file) return;
-            const fileName = `covers/${sessionId}_${Date.now()}`;
-            await client.storage.from('clips').upload(fileName, file);
-            const { data } = client.storage.from('clips').getPublicUrl(fileName);
-            await client.from('sessions').update({ cover_url: data.publicUrl }).eq('id', sessionId);
+            const filePath = `covers/${sessionId}_${Date.now()}`;
+            await client.storage.from('clips').upload(filePath, file);
+            const publicUrl = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${filePath}`;
+            await client.from('sessions').update({ cover_url: publicUrl }).eq('id', sessionId);
             loadSessions();
         }
 
@@ -133,40 +99,33 @@
 
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
-            const grid = document.getElementById('photos-grid');
-            grid.innerHTML = (data || []).map(p => `
+            document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
                 <div class="relative group rounded-2xl overflow-hidden shadow-md aspect-square bg-gray-200">
-                    <img src="${p.url_watermarked || p.url_original}" class="w-full h-full object-cover">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex flex-col items-center justify-center p-4">
                         <button onclick="window.open('https://stripe.com', '_blank')" class="bg-white text-black px-6 py-2 rounded-full font-bold text-sm shadow-xl hover:scale-105 transition">Comprar $5</button>
-                        ${isAdmin ? `<button onclick="deletePhoto('${p.id}')" class="mt-4 text-xs text-red-200 underline">Borrar Foto</button>` : ''}
+                        ${isAdmin ? `<button onclick="deletePhoto('${p.id}')" class="mt-4 text-xs text-red-200 underline">Borrar</button>` : ''}
                     </div>
                 </div>
-            `).join('') || '<p class="col-span-full text-center py-10 text-gray-400">No hay fotos todavía.</p>';
+            `).join('') || '<p class="col-span-full text-center py-10 text-gray-400">No hay fotos aún.</p>';
         }
 
         async function handleBulkUpload(event) {
             const files = event.target.files;
-            if (!files.length) return;
+            if (!files.length || !currentSessionId) return;
             alert("Subiendo...");
             for (let file of files) {
-                const fileName = `photos/${currentSessionId}/${Date.now()}_${file.name}`;
-                await client.storage.from('clips').upload(fileName, file);
-                const { data } = client.storage.from('clips').getPublicUrl(fileName);
-                await client.from('photos').insert([{ session_id: currentSessionId, url_original: data.publicUrl, url_watermarked: data.publicUrl }]);
+                const cleanName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
+                const filePath = `photos/${currentSessionId}/${Date.now()}_${cleanName}`;
+                await client.storage.from('clips').upload(filePath, file);
+                const publicUrl = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${filePath}`;
+                await client.from('photos').insert([{ session_id: currentSessionId, url_original: publicUrl, url_watermarked: publicUrl }]);
             }
             loadPhotos();
         }
 
-        async function deletePhoto(photoId) {
-            if (confirm("¿Borrar?")) { await client.from('photos').delete().eq('id', photoId); loadPhotos(); }
-        }
-
-        function showSessions() {
-            document.getElementById('view-sessions').classList.remove('hidden');
-            document.getElementById('view-gallery').classList.add('hidden');
-        }
-
+        async function deletePhoto(photoId) { if (confirm("¿Borrar?")) { await client.from('photos').delete().eq('id', photoId); loadPhotos(); } }
+        function showSessions() { document.getElementById('view-sessions').classList.remove('hidden'); document.getElementById('view-gallery').classList.add('hidden'); }
         checkUser();
     </script>
 </body>
