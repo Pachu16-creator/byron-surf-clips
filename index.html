@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,74 +18,111 @@
                 <button onclick="showPacks()" class="hover:text-blue-400">PACKS</button>
             </div>
         </nav>
-        <h1 id="hero-title" class="text-6xl font-black italic mb-6">CAPTURANDO LA OLA</h1>
-        <p id="hero-subtitle" class="text-xl mb-10 max-w-lg opacity-90">Profesionales capturando el momento exacto.</p>
-        <button onclick="goToSessions()" class="bg-blue-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-blue-500 transition">Ver Sesiones</button>
+        <h1 class="text-6xl font-black italic mb-6">CAPTURE THE WAVE</h1>
+        <button onclick="goToSessions()" class="bg-blue-600 px-10 py-4 rounded-full font-bold text-lg hover:bg-blue-500 transition">View Sessions</button>
     </section>
 
-    <section id="sessions-page" class="hidden flex-grow pt-10">
-        <div class="max-w-6xl mx-auto p-4">
-            <nav class="flex justify-between items-center mb-8">
-                <h1 class="font-black text-2xl text-blue-900 cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
-                <button onclick="toggleCartModal()">🛒 Cart (<span id="cart-count">0</span>)</button>
-            </nav>
-            <input type="text" id="filter-loc" placeholder="Filtrar por ubicación..." class="w-full p-3 rounded-xl border mb-8" onkeyup="filterSessions()">
+    <section id="sessions-page" class="hidden flex-grow pt-10 px-4">
+        <nav class="max-w-6xl mx-auto flex justify-between items-center mb-8">
+            <h1 class="font-black text-2xl text-blue-900 cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
+            <button onclick="alert('Cart: ' + cart.length + ' items')">🛒 Cart (<span id="cart-count">0</span>)</button>
+        </nav>
+        
+        <main class="max-w-6xl mx-auto">
+            <div id="admin-panel" class="hidden bg-white p-6 rounded-2xl mb-8 border-2 border-dashed border-blue-400">
+                <h2 class="font-bold text-blue-800">Admin Mode</h2>
+            </div>
+            
+            <input type="text" id="filter-loc" placeholder="Filter by location..." class="w-full p-3 rounded-xl border mb-8" onkeyup="filterSessions()">
             <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            
             <div id="view-gallery" class="hidden">
-                <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold">← Volver</button>
+                <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold">← Back to Sessions</button>
                 <h2 id="gallery-header" class="text-3xl font-black mb-8"></h2>
                 <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
-        </div>
+        </main>
     </section>
 
     <section id="packs-page" class="hidden flex-grow pt-20 p-6">
         <h2 class="text-4xl font-black text-center mb-10">Photo Packs</h2>
         <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"></div>
-        <button onclick="backToHome()" class="mt-10 block mx-auto text-blue-600 font-bold">← Volver al inicio</button>
+        <button onclick="backToHome()" class="mt-10 block mx-auto text-blue-600 font-bold">← Back Home</button>
     </section>
-
-    <footer class="bg-white border-t mt-auto py-8 text-center text-gray-500 text-sm">
-        <p>© 2026 Byron Surf Clips. All rights reserved.</p>
-    </footer>
 
     <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/90 flex items-center justify-center p-4">
         <button onclick="prevPhoto()" class="absolute left-4 text-white text-5xl">❮</button>
-        <div class="relative"><img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg"></div>
+        <div class="relative">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+        </div>
         <button onclick="nextPhoto()" class="absolute right-4 text-white text-5xl">❯</button>
         <button onclick="closeLightbox()" class="absolute top-4 right-4 text-white text-3xl">✕</button>
     </div>
 
     <script>
-        const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU');
-        let sessions = [], currentPhotos = [], currentIndex = 0;
+        const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'YOUR_ANON_KEY');
+        let sessions = [], currentPhotos = [], currentIndex = 0, cart = [];
+        const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
 
         function hideAll() { document.getElementById('landing-page').classList.add('hidden'); document.getElementById('sessions-page').classList.add('hidden'); document.getElementById('packs-page').classList.add('hidden'); }
         function goToSessions() { hideAll(); document.getElementById('sessions-page').classList.remove('hidden'); loadSessions(); }
         function showPacks() { hideAll(); document.getElementById('packs-page').classList.remove('hidden'); loadPacks(); }
         function backToHome() { hideAll(); document.getElementById('landing-page').classList.remove('hidden'); }
+        function showSessions() { document.getElementById('sessions-grid').classList.remove('hidden'); document.getElementById('view-gallery').classList.add('hidden'); }
 
-        async function loadPacks() {
-            const { data } = await client.from('packs').select('*').order('id');
-            document.getElementById('packs-container').innerHTML = data.map(p => `
-                <div class="bg-[#1a2432] border p-8 rounded-3xl text-center shadow-lg hover:border-blue-500 transition-all">
-                    <h3 class="text-2xl font-bold text-white">${p.name}</h3>
-                    <p class="text-gray-400 text-sm mt-2">${p.photos_count} photos</p>
-                    <p class="text-4xl font-black text-white my-6">$${p.price} <span class="text-sm">AUD</span></p>
-                    <button onclick="goToSessions()" class="bg-blue-600 text-white w-full py-3 rounded-full font-bold">Choose Photos</button>
+        async function loadSessions() {
+            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
+            sessions = data || [];
+            renderSessions(sessions);
+        }
+
+        function renderSessions(list) {
+            document.getElementById('sessions-grid').innerHTML = list.map(s => `
+                <div class="bg-white rounded-3xl border cursor-pointer overflow-hidden" onclick="openGallery('${s.id}', '${s.location}')">
+                    <img src="${s.cover_url}" class="w-full h-48 object-cover">
+                    <div class="p-5">
+                        <h3 class="font-black text-xl">${s.location}</h3>
+                        <p class="text-blue-600 font-bold">${s.time_range || ''}</p>
+                        <p class="text-gray-500 text-sm">${s.date || ''}</p>
+                    </div>
                 </div>`).join('');
         }
 
-        async function loadSessions() { const { data } = await client.from('sessions').select('*').order('date', { ascending: false }); sessions = data || []; renderSessions(sessions); }
-        function renderSessions(list) { document.getElementById('sessions-grid').innerHTML = list.map(s => `<div class="bg-white rounded-3xl border cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')"><img src="${s.cover_url}" class="w-full h-48 object-cover rounded-t-3xl"><div class="p-5"><h3 class="font-black text-xl">${s.location}</h3></div></div>`).join(''); }
+        async function openGallery(id, title) {
+            document.getElementById('sessions-grid').classList.add('hidden');
+            document.getElementById('view-gallery').classList.remove('hidden');
+            document.getElementById('gallery-header').innerText = title;
+            const { data } = await client.from('photos').select('*').eq('session_id', id);
+            currentPhotos = data || [];
+            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
+                <div class="relative aspect-square border rounded-xl overflow-hidden">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox(${i})">
+                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+                    <input type="checkbox" class="absolute top-2 left-2 z-10 w-6 h-6" onchange="toggleCart('${p.url_watermarked}', this)">
+                </div>`).join('');
+        }
 
-        function openGallery(id, title) { document.getElementById('sessions-grid').classList.add('hidden'); document.getElementById('view-gallery').classList.remove('hidden'); document.getElementById('gallery-header').innerText = title; loadPhotos(id); }
-        async function loadPhotos(id) { const { data } = await client.from('photos').select('*').eq('session_id', id); currentPhotos = data || []; document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `<div class="relative aspect-square border"><img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox(${i})"></div>`).join(''); }
+        function toggleCart(url, el) {
+            if(el.checked) cart.push(url); else cart = cart.filter(i => i !== url);
+            document.getElementById('cart-count').innerText = cart.length;
+        }
 
+        // LIGHTBOX
         function openLightbox(i) { currentIndex = i; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; document.getElementById('lightbox').classList.remove('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
         function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+
+        async function loadPacks() {
+            const { data } = await client.from('packs').select('*').order('id');
+            document.getElementById('packs-container').innerHTML = data.map(p => `
+                <div class="bg-[#1a2432] p-8 rounded-3xl text-center text-white border border-gray-700">
+                    <h3 class="text-2xl font-bold">${p.name}</h3>
+                    <p class="text-4xl font-black my-4">$${p.price} <span class="text-sm">AUD</span></p>
+                    <button onclick="goToSessions()" class="bg-blue-600 w-full py-3 rounded-full font-bold">Choose Photos</button>
+                </div>`).join('');
+        }
     </script>
 </body>
 </html>
