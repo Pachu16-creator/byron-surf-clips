@@ -39,9 +39,14 @@
     </main>
 
     <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeLightbox()">
-        <div class="relative"><img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg"><img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none"></div>
+        <div class="relative">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+        </div>
         <button class="absolute top-5 right-5 text-white text-3xl">✕</button>
     </div>
+
+    
 
     <script>
         const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
@@ -60,15 +65,24 @@
             loadSessions();
         }
 
-        async function updateCover(id) {
-            const url = prompt("Introduce la URL de la nueva portada:");
-            if (url) {
-                await client.from('sessions').update({ cover_url: url }).eq('id', id);
-                location.reload();
-            }
-        }
-
         async function logout() { await client.auth.signOut(); location.reload(); }
+
+        // Función corregida: elige archivo local y sube automáticamente
+        async function updateCover(id) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const fileName = `covers/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+                await client.storage.from('clips').upload(fileName, file);
+                const publicUrl = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${fileName}`;
+                await client.from('sessions').update({ cover_url: publicUrl }).eq('id', id);
+                location.reload();
+            };
+            input.click();
+        }
 
         async function createSession() {
             const { error } = await client.from('sessions').insert([{
@@ -87,7 +101,7 @@
                         <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
                         <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
                     </div>
-                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 hover:bg-blue-50">Cambiar Portada</button>` : ''}
+                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 hover:bg-blue-50 border-t">Cambiar Portada</button>` : ''}
                 </div>
             `).join('');
         }
@@ -105,7 +119,7 @@
 
         async function handleBulkUpload(event) {
             const files = event.target.files;
-            alert("Subiendo...");
+            alert("Subiendo fotos...");
             for (let file of files) {
                 const name = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
                 await client.storage.from('clips').upload(`originals/${name}`, file);
