@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Byron Surf Clips</title>
+    <title>Byron Surf Clips - Versión Completa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -25,7 +25,7 @@
                 <input type="text" id="loc" placeholder="Ubicación" class="border p-2 rounded-lg text-sm">
                 <input type="text" id="time_range" placeholder="Horario" class="border p-2 rounded-lg text-sm">
                 <input type="date" id="date" class="border p-2 rounded-lg text-sm">
-                <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Publicar</button>
+                <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Publicar Sesión</button>
             </div>
         </section>
 
@@ -34,17 +34,19 @@
         <div id="view-gallery" class="hidden">
             <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold hover:underline">← Volver</button>
             <h2 id="gallery-header" class="text-3xl font-black mb-8"></h2>
+            
             <div id="admin-upload" class="hidden bg-blue-50 p-8 rounded-3xl mb-10 text-center border-2 border-dashed border-blue-200">
                 <input type="file" id="bulk-upload" multiple class="hidden" onchange="handleBulkUpload(event)">
-                <label for="bulk-upload" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-blue-700">Subir Fotos</label>
+                <label for="bulk-upload" class="bg-blue-600 text-white px-8 py-3 rounded-full font-bold cursor-pointer hover:bg-blue-700">Subir Fotos Masivamente</label>
             </div>
+            
             <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
         </div>
     </main>
 
     <div id="cart-bar" class="hidden fixed bottom-6 left-6 right-6 bg-blue-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-50 max-w-6xl mx-auto">
         <span id="cart-count" class="font-bold">0 fotos seleccionadas</span>
-        <button onclick="checkout()" class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-xl font-black hover:bg-yellow-300">COMPRAR</button>
+        <button onclick="checkout()" class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-xl font-black hover:bg-yellow-300">COMPRAR SELECCIÓN</button>
     </div>
 
     <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onclick="closeLightbox()">
@@ -66,6 +68,8 @@
             if (error) alert(error.message); else location.reload();
         }
 
+        async function logout() { await client.auth.signOut(); location.reload(); }
+
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
             if (user?.email === "wildpauu@gmail.com") {
@@ -76,11 +80,49 @@
             loadSessions();
         }
 
+        async function loadSessions() {
+            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
+            document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
+                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border">
+                    <div class="cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
+                        <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
+                        <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
+                    </div>
+                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 hover:bg-blue-50 border-t">Cambiar Portada</button>` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function createSession() {
+            const { error } = await client.from('sessions').insert([{
+                location: document.getElementById('loc').value,
+                time_range: document.getElementById('time_range').value,
+                date: document.getElementById('date').value
+            }]);
+            if (error) alert(error.message); else location.reload();
+        }
+
+        async function updateCover(id) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const path = `covers/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+                await client.storage.from('clips').upload(path, file);
+                const url = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${path}`;
+                await client.from('sessions').update({ cover_url: url }).eq('id', id);
+                location.reload();
+            };
+            input.click();
+        }
+
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
             document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
-                <div class="relative rounded-2xl overflow-hidden aspect-square border-4 border-transparent group">
+                <div class="relative rounded-2xl overflow-hidden aspect-square border-2 border-transparent">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox('${p.url_watermarked}')">
                     <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
                     <input type="checkbox" class="absolute top-3 left-3 w-6 h-6 z-10 cursor-pointer" onchange="toggleCart('${p.url_watermarked}', this)">
@@ -88,20 +130,39 @@
             `).join('');
         }
 
-        function toggleCart(url, checkbox) {
-            if (checkbox.checked) cart.push(url);
-            else cart = cart.filter(item => item !== url);
-            
+        async function handleBulkUpload(e) {
+            alert("Subiendo fotos...");
+            for (let file of e.target.files) {
+                const name = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
+                await client.storage.from('clips').upload(`originals/${name}`, file);
+                await client.storage.from('clips').upload(`watermarked/${name}`, file);
+                await client.from('photos').insert([{ session_id: currentSessionId, url_original: `.../originals/${name}`, url_watermarked: `.../watermarked/${name}` }]);
+            }
+            loadPhotos();
+        }
+
+        function toggleCart(url, cb) {
+            if (cb.checked) cart.push(url); else cart = cart.filter(i => i !== url);
             document.getElementById('cart-bar').classList.toggle('hidden', cart.length === 0);
             document.getElementById('cart-count').innerText = `${cart.length} fotos seleccionadas`;
+        }
+
+        function openGallery(id, title) {
+            currentSessionId = id;
+            document.getElementById('sessions-grid').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('view-gallery').classList.remove('hidden');
+            document.getElementById('gallery-header').innerText = title;
+            if (isAdmin) document.getElementById('admin-upload').classList.remove('hidden');
+            loadPhotos();
         }
 
         function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function showSessions() { location.reload(); }
-        // ... (Mantén aquí las funciones auxiliares de crear sesión y carga original)
+        function checkout() { alert("Procesando " + cart.length + " fotos..."); }
+
         checkUser();
     </script>
 </body>
 </html>
-
