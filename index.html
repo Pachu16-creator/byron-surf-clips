@@ -15,18 +15,17 @@
     </nav>
 
     <main class="max-w-6xl mx-auto p-4">
-        <div id="view-sessions">
-            <section id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-sm mb-10 border-2 border-dashed border-blue-200">
-                <h2 class="font-bold mb-4 text-blue-800">Crear Nueva Sesión</h2>
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <input type="text" id="loc" placeholder="Ubicación" class="border p-2 rounded-lg text-sm">
-                    <input type="text" id="time" placeholder="Ej: 08:00 AM" class="border p-2 rounded-lg text-sm">
-                    <input type="date" id="date" class="border p-2 rounded-lg text-sm">
-                    <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Publicar</button>
-                </div>
-            </section>
-            <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        </div>
+        <section id="admin-panel" class="hidden bg-white p-6 rounded-2xl shadow-sm mb-10 border-2 border-dashed border-blue-200">
+            <h2 class="font-bold mb-4 text-blue-800">Crear Nueva Sesión</h2>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <input type="text" id="loc" placeholder="Ubicación" class="border p-2 rounded-lg text-sm">
+                <input type="text" id="time_range" placeholder="Horario (ej: 8am-10am)" class="border p-2 rounded-lg text-sm">
+                <input type="date" id="date" class="border p-2 rounded-lg text-sm">
+                <button onclick="createSession()" class="bg-blue-600 text-white font-bold py-2 rounded-lg hover:bg-blue-700">Publicar</button>
+            </div>
+        </section>
+
+        <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
 
         <div id="view-gallery" class="hidden">
             <button onclick="showSessions()" class="mb-6 text-blue-600 font-bold hover:underline">← Volver</button>
@@ -41,11 +40,13 @@
 
     <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeLightbox()">
         <div class="relative">
-            <img id="lightbox-img" class="max-w-full max-h-[80vh] rounded-lg">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
             <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
         </div>
         <button class="absolute top-5 right-5 text-white text-3xl">✕</button>
     </div>
+
+    
 
     <script>
         const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
@@ -54,18 +55,20 @@
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
             isAdmin = (user?.email === "wildpauu@gmail.com");
-            if (isAdmin) { document.getElementById('admin-panel').classList.remove('hidden'); }
+            if (isAdmin) { 
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('auth-ui').innerHTML = `<span class="bg-red-600 text-white text-xs px-2 py-1 rounded">ADMIN</span>`;
+            }
             loadSessions();
         }
 
         async function createSession() {
             const { error } = await client.from('sessions').insert([{
                 location: document.getElementById('loc').value,
-                time: document.getElementById('time').value,
+                time_range: document.getElementById('time_range').value,
                 date: document.getElementById('date').value
             }]);
-            if (error) alert("Error: " + error.message);
-            else location.reload();
+            if (error) alert("Error: " + error.message); else location.reload();
         }
 
         async function loadSessions() {
@@ -73,7 +76,7 @@
             document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
                 <div class="bg-white rounded-3xl shadow-sm overflow-hidden border cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
                     <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
-                    <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time || ''}</p></div>
+                    <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
                 </div>
             `).join('');
         }
@@ -92,18 +95,24 @@
 
         async function handleBulkUpload(event) {
             const files = event.target.files;
+            alert("Subiendo fotos a carpetas...");
             for (let file of files) {
                 const name = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
                 await client.storage.from('clips').upload(`originals/${name}`, file);
                 await client.storage.from('clips').upload(`watermarked/${name}`, file);
-                await client.from('photos').insert([{ session_id: currentSessionId, url_original: `.../originals/${name}`, url_watermarked: `.../watermarked/${name}` }]);
+                await client.from('photos').insert([{ 
+                    session_id: currentSessionId, 
+                    url_original: `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/originals/${name}`, 
+                    url_watermarked: `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermarked/${name}` 
+                }]);
             }
             loadPhotos();
         }
 
         function openGallery(id, title) {
             currentSessionId = id;
-            document.getElementById('view-sessions').classList.add('hidden');
+            document.getElementById('sessions-grid').classList.add('hidden');
+            document.getElementById('admin-panel').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerHTML = `<h2 class="text-3xl font-black">${title}</h2>`;
             if (isAdmin) document.getElementById('admin-upload').classList.remove('hidden');
@@ -112,7 +121,7 @@
 
         function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
-        function showSessions() { document.getElementById('view-sessions').classList.remove('hidden'); document.getElementById('view-gallery').classList.add('hidden'); }
+        function showSessions() { location.reload(); }
         
         checkUser();
     </script>
