@@ -12,20 +12,20 @@
     <nav class="bg-white p-4 shadow-md flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-b-2xl sticky top-0 z-40">
         <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="location.reload()">BYRON SURF CLIPS</h1>
         <div class="flex items-center gap-4">
-            <button onclick="toggleCartModal()" class="relative">
+            <button onclick="toggleCartModal()" class="relative font-bold hover:text-blue-600">
                 🛒 Cart (<span id="cart-count">0</span>)
             </button>
             <div id="auth-ui" class="flex items-center gap-2">
                 <input type="email" id="email" placeholder="Email" class="border p-1 rounded text-xs w-20">
                 <input type="password" id="pass" placeholder="Password" class="border p-1 rounded text-xs w-20">
-                <button onclick="login()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Login</button>
+                <button onclick="login()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-blue-700">Login</button>
             </div>
         </div>
     </nav>
 
     <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex justify-end">
         <div class="bg-white w-full max-w-sm p-6 overflow-y-auto">
-            <div class="flex justify-between mb-6"><h2 class="font-black text-xl">Your Selection</h2><button onclick="toggleCartModal()">✕</button></div>
+            <div class="flex justify-between mb-6"><h2 class="font-black text-xl">Your Selection</h2><button onclick="toggleCartModal()" class="text-2xl">✕</button></div>
             <div id="cart-items" class="grid grid-cols-2 gap-2 mb-6"></div>
             <button onclick="checkout()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700">Proceed to Checkout</button>
         </div>
@@ -68,7 +68,7 @@
         const client = supabase.createClient('https://gmyptbfrpspzmyucqumz.supabase.co', 'sb_publishable_ZHZEWqDDkHjnhUwTezQ9cw__1xzvrUv');
         let isAdmin = false; let currentSessionId = null; let cart = [];
 
-        // Auth Logic
+        // --- AUTH ---
         async function login() {
             const { error } = await client.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('pass').value });
             if (error) alert(error.message); else location.reload();
@@ -79,12 +79,12 @@
             if (user?.email === "wildpauu@gmail.com") {
                 isAdmin = true;
                 document.getElementById('admin-panel').classList.remove('hidden');
-                document.getElementById('auth-ui').innerHTML = `<span class="text-xs text-green-600">Admin</span> <button onclick="logout()" class="text-xs text-red-500">Logout</button>`;
+                document.getElementById('auth-ui').innerHTML = `<span class="text-xs text-green-600">Admin</span> <button onclick="logout()" class="text-xs text-red-500 font-bold">Logout</button>`;
             }
             loadSessions();
         }
 
-        // Sessions Logic
+        // --- SESSIONS ---
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
@@ -93,7 +93,7 @@
                         <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
                         <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
                     </div>
-                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 border-t">Change Cover</button>` : ''}
+                    ${isAdmin ? `<button onclick="updateCover('${s.id}')" class="w-full py-2 text-xs text-blue-600 border-t font-bold">Change Cover</button>` : ''}
                 </div>
             `).join('');
         }
@@ -111,7 +111,7 @@
             const input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
             input.onchange = async (e) => {
                 const file = e.target.files[0];
-                const path = `covers/${Date.now()}_${file.name}`;
+                const path = `covers/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
                 await client.storage.from('clips').upload(path, file);
                 const url = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${path}`;
                 await client.from('sessions').update({ cover_url: url }).eq('id', id);
@@ -119,8 +119,9 @@
             }; input.click();
         }
 
-        // Gallery & Cart Logic
+        // --- GALLERY & CART ---
         function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); renderCart(); }
+        
         function renderCart() {
             document.getElementById('cart-items').innerHTML = cart.map(url => `<img src="${url}" class="rounded-lg aspect-square object-cover">`).join('');
         }
@@ -144,7 +145,7 @@
 
         async function handleBulkUpload(e) {
             for (let file of e.target.files) {
-                const name = `${Date.now()}_${file.name}`;
+                const name = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
                 await client.storage.from('clips').upload(`originals/${name}`, file);
                 await client.storage.from('clips').upload(`watermarked/${name}`, file);
                 await client.from('photos').insert([{ session_id: currentSessionId, url_original: `...`, url_watermarked: `.../watermarked/${name}` }]);
@@ -152,6 +153,7 @@
             loadPhotos();
         }
 
+        // --- NAVIGATION ---
         function openGallery(id, title) {
             currentSessionId = id;
             document.getElementById('sessions-grid').classList.add('hidden');
@@ -165,7 +167,11 @@
         function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function showSessions() { location.reload(); }
-        function checkout() { alert("Redirecting to Stripe... Total photos: " + cart.length); }
+        
+        // --- STRIPE INTEGRATION (PLACEHOLDER) ---
+        function checkout() {
+            alert("Connecting to Stripe Checkout with " + cart.length + " photos. Ensure you have set up your Edge Function endpoint.");
+        }
 
         checkUser();
     </script>
