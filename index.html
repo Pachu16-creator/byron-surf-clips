@@ -40,7 +40,10 @@
     </main>
 
     <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4" onclick="closeLightbox()">
-        <img id="lightbox-img" class="max-w-full max-h-full object-contain rounded-lg">
+        <div class="relative">
+            <img id="lightbox-img" class="max-w-full max-h-screen object-contain rounded-lg">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+        </div>
         <button class="absolute top-5 right-5 text-white font-black text-2xl">✕</button>
     </div>
 
@@ -61,18 +64,22 @@
 
         async function createSession() { 
             const loc = document.getElementById('loc').value; 
+            const time = document.getElementById('time').value; 
             const date = document.getElementById('date').value; 
-            await client.from('sessions').insert([{ location: loc, date: date }]); 
+            await client.from('sessions').insert([{ location: loc, time: time, date: date }]); 
             location.reload(); 
         }
 
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
-                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border relative group">
+                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border relative">
                     <div onclick="openGallery('${s.id}', '${s.location}')" class="cursor-pointer">
                         <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
-                        <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3></div>
+                        <div class="p-5">
+                            <h3 class="font-black text-xl">${s.location}</h3>
+                            <p class="text-gray-500 text-sm">${s.date} • ${s.time}</p>
+                        </div>
                     </div>
                 </div>
             `).join('');
@@ -104,18 +111,15 @@
 
         async function handleBulkUpload(event) {
             const files = event.target.files;
-            alert("Subiendo fotos a carpetas...");
+            alert("Subiendo...");
             for (let file of files) {
                 const cleanName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, "_")}`;
                 const pathOrig = `originals/${cleanName}`;
                 const pathWm = `watermarked/${cleanName}`;
-                
                 await client.storage.from('clips').upload(pathOrig, file);
                 await client.storage.from('clips').upload(pathWm, file);
-                
                 const urlOrig = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${pathOrig}`;
                 const urlWm = `https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/${pathWm}`;
-                
                 await client.from('photos').insert([{ session_id: currentSessionId, url_original: urlOrig, url_watermarked: urlWm }]);
             }
             loadPhotos();
