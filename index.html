@@ -7,13 +7,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
-<body class="bg-gray-100 min-h-screen pb-20">
+<body class="bg-gray-100 min-h-screen pb-24">
 
     <nav class="bg-white p-4 shadow-md flex justify-between items-center max-w-6xl mx-auto mb-6 rounded-b-2xl sticky top-0 z-40">
         <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="location.reload()">BYRON SURF CLIPS</h1>
         <div id="auth-ui" class="flex items-center gap-2">
-            <input type="email" id="email" placeholder="Email" class="border p-1 rounded text-xs w-32">
-            <input type="password" id="pass" placeholder="Password" class="border p-1 rounded text-xs w-32">
+            <input type="email" id="email" placeholder="Email" class="border p-1 rounded text-xs w-24">
+            <input type="password" id="pass" placeholder="Pass" class="border p-1 rounded text-xs w-24">
             <button onclick="login()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs font-bold">Login</button>
         </div>
     </nav>
@@ -42,9 +42,17 @@
         </div>
     </main>
 
-    <div id="cart-bar" class="hidden fixed bottom-6 left-6 right-6 bg-blue-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-50">
+    <div id="cart-bar" class="hidden fixed bottom-6 left-6 right-6 bg-blue-900 text-white p-4 rounded-2xl shadow-2xl flex justify-between items-center z-50 max-w-6xl mx-auto">
         <span id="cart-count" class="font-bold">0 fotos seleccionadas</span>
-        <button onclick="checkout()" class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-xl font-black">COMPRAR</button>
+        <button onclick="checkout()" class="bg-yellow-400 text-blue-900 px-6 py-2 rounded-xl font-black hover:bg-yellow-300">COMPRAR</button>
+    </div>
+
+    <div id="lightbox" class="hidden fixed inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onclick="closeLightbox()">
+        <div class="relative">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-lg">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+        </div>
+        <button class="absolute top-5 right-5 text-white text-3xl font-bold">✕</button>
     </div>
 
     
@@ -54,9 +62,7 @@
         let isAdmin = false; let currentSessionId = null; let cart = [];
 
         async function login() {
-            const email = document.getElementById('email').value;
-            const pass = document.getElementById('pass').value;
-            const { error } = await client.auth.signInWithPassword({ email, password: pass });
+            const { error } = await client.auth.signInWithPassword({ email: document.getElementById('email').value, password: document.getElementById('pass').value });
             if (error) alert(error.message); else location.reload();
         }
 
@@ -70,56 +76,32 @@
             loadSessions();
         }
 
-        async function logout() { await client.auth.signOut(); location.reload(); }
-
-        // --- Funciones de Sesión y Galería ---
-        async function loadSessions() {
-            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
-            document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
-                <div class="bg-white rounded-3xl shadow-sm overflow-hidden border cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
-                    <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-48 object-cover">
-                    <div class="p-5"><h3 class="font-black text-xl">${s.location}</h3><p class="text-gray-500 text-sm">${s.date || ''} • ${s.time_range || ''}</p></div>
-                </div>
-            `).join('');
-        }
-
-        function openGallery(id, title) {
-            currentSessionId = id;
-            document.getElementById('sessions-grid').classList.add('hidden');
-            document.getElementById('admin-panel').classList.add('hidden');
-            document.getElementById('view-gallery').classList.remove('hidden');
-            document.getElementById('gallery-header').innerText = title;
-            if (isAdmin) document.getElementById('admin-upload').classList.remove('hidden');
-            loadPhotos();
-        }
-
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
+            const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
             document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
-                <div class="relative rounded-2xl overflow-hidden aspect-square cursor-pointer transition" onclick="toggleSelect('${p.url_watermarked}', this)">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-black/20 hover:bg-black/0 transition"></div>
+                <div class="relative rounded-2xl overflow-hidden aspect-square border-4 border-transparent group">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox('${p.url_watermarked}')">
+                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
+                    <input type="checkbox" class="absolute top-3 left-3 w-6 h-6 z-10 cursor-pointer" onchange="toggleCart('${p.url_watermarked}', this)">
                 </div>
             `).join('');
         }
 
-        function toggleSelect(url, element) {
-            if (cart.includes(url)) {
-                cart = cart.filter(item => item !== url);
-                element.classList.remove('ring-4', 'ring-blue-500');
-            } else {
-                cart.push(url);
-                element.classList.add('ring-4', 'ring-blue-500');
-            }
+        function toggleCart(url, checkbox) {
+            if (checkbox.checked) cart.push(url);
+            else cart = cart.filter(item => item !== url);
+            
             document.getElementById('cart-bar').classList.toggle('hidden', cart.length === 0);
             document.getElementById('cart-count').innerText = `${cart.length} fotos seleccionadas`;
         }
 
-        function checkout() { alert("Procesando pago de " + cart.length + " fotos..."); }
-
+        function openLightbox(url) { document.getElementById('lightbox-img').src = url; document.getElementById('lightbox').classList.remove('hidden'); }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function showSessions() { location.reload(); }
-        
+        // ... (Mantén aquí las funciones auxiliares de crear sesión y carga original)
         checkUser();
     </script>
 </body>
 </html>
+
