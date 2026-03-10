@@ -6,12 +6,7 @@
     <title>Byron Surf Clips | Capture the Wave</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        #hero-section { transition: background 0.8s ease-in-out; background-size: cover; background-position: center; }
-        .hero-gradient { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .glass-effect { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col font-sans">
 
@@ -20,387 +15,95 @@
         <nav class="absolute top-0 w-full p-6 flex justify-between items-center max-w-6xl z-10">
             <h1 class="font-black italic text-2xl tracking-tighter cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
             <div class="flex gap-8 font-bold text-sm uppercase tracking-widest">
-                <button onclick="goToSessions()" class="hover:text-blue-400 transition underline-offset-8 hover:underline">Sessions</button>
-                <button onclick="showPacks()" class="hover:text-blue-400 transition underline-offset-8 hover:underline">Packs</button>
+                <button onclick="goToSessions()" class="hover:text-blue-400 transition">Sessions</button>
+                <button onclick="showPacks()" class="hover:text-blue-400 transition">Packs</button>
             </div>
         </nav>
-        
         <div class="z-10">
-            <h1 id="hero-title" class="text-6xl md:text-8xl font-black italic mb-4 tracking-tighter uppercase leading-none">CAPTURE THE WAVE</h1>
-            <p id="hero-subtitle" class="text-lg md:text-2xl mb-10 max-w-2xl opacity-90 font-medium mx-auto">Professional surf photography from the heart of Byron Bay.</p>
-            <button onclick="goToSessions()" class="bg-blue-600 px-14 py-5 rounded-full font-black text-lg hover:bg-blue-500 transition shadow-2xl hover:scale-105 active:scale-95">FIND MY SHOTS</button>
+            <h1 id="hero-title" class="text-6xl md:text-8xl font-black italic mb-4 tracking-tighter uppercase leading-none">LOADING...</h1>
+            <p id="hero-subtitle" class="text-lg md:text-2xl mb-10 max-w-2xl opacity-90 font-medium mx-auto"></p>
+            <button onclick="goToSessions()" class="bg-blue-600 px-14 py-5 rounded-full font-black text-lg hover:bg-blue-500 transition shadow-2xl">FIND MY SHOTS</button>
         </div>
     </section>
 
-    <section id="sessions-page" class="hidden flex-grow pt-10 px-4">
+    <section id="sessions-page" class="hidden flex-grow pt-10 px-4 pb-20">
         <nav class="max-w-6xl mx-auto flex justify-between items-center mb-10 bg-white p-5 rounded-[2rem] shadow-sm border border-gray-100">
             <h1 class="font-black italic text-2xl text-blue-900 cursor-pointer" onclick="backToHome()">BYRON SURF CLIPS</h1>
             <div class="flex items-center gap-6">
                 <div id="auth-ui" class="flex gap-2">
-                    <input type="email" id="login-email" placeholder="Email for Magic Link" class="border p-2 px-4 rounded-xl text-xs w-40 outline-none focus:ring-2 focus:ring-blue-100">
-                    <button onclick="login()" class="bg-gray-900 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-gray-700 transition">Login</button>
+                    <input type="email" id="login-email" placeholder="Email" class="border p-2 px-4 rounded-xl text-xs w-40 outline-none">
+                    <button onclick="login()" class="bg-gray-900 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-gray-700">Login</button>
                 </div>
-                <button onclick="toggleCartModal()" class="font-bold text-blue-600 flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 hover:bg-blue-100 transition">
+                <button onclick="toggleCartModal()" class="font-bold text-blue-600 flex items-center gap-2 bg-blue-50 px-4 py-2 rounded-xl border border-blue-100">
                     🛒 <span id="cart-count">0</span>
                 </button>
             </div>
         </nav>
 
-        <main class="max-w-6xl mx-auto pb-20">
-            <div id="admin-panel" class="hidden space-y-6 mb-12">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-blue-100 relative">
-                    <div class="flex justify-between items-center mb-8">
-                        <h2 class="font-black text-blue-800 uppercase italic text-2xl">Admin Control Center</h2>
-                        <button onclick="exitAdmin()" class="bg-red-50 text-red-600 px-6 py-2 rounded-full text-xs font-black hover:bg-red-600 hover:text-white transition uppercase tracking-widest border border-red-100">Exit Admin</button>
+        <main class="max-w-6xl mx-auto">
+            <div id="admin-panel" class="hidden bg-white p-8 rounded-[2.5rem] shadow-lg border-2 border-blue-100 mb-12 relative">
+                <button onclick="exitAdmin()" class="absolute top-6 right-6 text-red-500 font-bold text-xs uppercase tracking-widest">Exit Admin</button>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                    <div class="space-y-4">
+                        <h3 class="font-black text-gray-400 text-[10px] uppercase">1. Site Design</h3>
+                        <input type="text" id="edit-hero-title" placeholder="Title" class="w-full border p-3 rounded-xl text-sm">
+                        <input type="text" id="edit-hero-subtitle" placeholder="Subtitle" class="w-full border p-3 rounded-xl text-sm">
+                        <input type="file" id="edit-hero-bg-file" class="text-xs">
+                        <button onclick="updateSiteSettings()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl">Update Site</button>
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div class="space-y-4 bg-gray-50 p-6 rounded-3xl">
-                            <h3 class="font-black text-gray-400 text-[10px] tracking-widest uppercase">1. Website Appearance</h3>
-                            <input type="text" id="edit-hero-title" placeholder="Hero Title" class="w-full border p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                            <input type="text" id="edit-hero-subtitle" placeholder="Hero Subtitle" class="w-full border p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-500 mb-2 uppercase">Background Image (Storage)</label>
-                                <input type="file" id="edit-hero-bg-file" class="text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                            </div>
-                            <button onclick="updateSiteSettings()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl hover:bg-blue-700 shadow-md transition">UPDATE WEBSITE</button>
-                        </div>
-
-                        <div class="space-y-4 bg-gray-50 p-6 rounded-3xl">
-                            <h3 class="font-black text-gray-400 text-[10px] tracking-widest uppercase">2. Create New Session</h3>
-                            <input type="text" id="new-loc" placeholder="Location Name" class="w-full border p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                            <div class="flex gap-2">
-                                <input type="text" id="new-time" placeholder="Time Range" class="w-1/2 border p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                                <input type="date" id="new-date" class="w-1/2 border p-3 rounded-xl text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-gray-500 mb-2 uppercase">Session Cover Photo</label>
-                                <input type="file" id="new-cover-file" class="text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer">
-                            </div>
-                            <button onclick="createSession()" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl hover:bg-green-700 shadow-md transition">PUBLISH SESSION</button>
-                        </div>
+                    <div class="space-y-4">
+                        <h3 class="font-black text-gray-400 text-[10px] uppercase">2. New Session</h3>
+                        <input type="text" id="new-loc" placeholder="Location" class="w-full border p-3 rounded-xl text-sm">
+                        <input type="date" id="new-date" class="w-full border p-3 rounded-xl text-sm">
+                        <input type="file" id="new-cover-file" class="text-xs">
+                        <button onclick="createSession()" class="w-full bg-green-600 text-white font-black py-4 rounded-2xl">Publish</button>
                     </div>
                 </div>
             </div>
 
-            <div id="sessions-grid-container">
-                <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div>
-            </div>
-            
+            <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"></div>
             <div id="view-gallery" class="hidden">
                 <div class="flex items-center gap-4 mb-10">
-                    <button onclick="showSessions()" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition text-blue-600 font-bold border border-gray-100">← BACK</button>
-                    <h2 id="gallery-header" class="text-4xl font-black italic text-gray-900 tracking-tighter"></h2>
+                    <button onclick="showSessions()" class="bg-white p-4 rounded-2xl shadow-sm hover:shadow-md transition text-blue-600 font-bold">← BACK</button>
+                    <h2 id="gallery-header" class="text-4xl font-black italic text-gray-900"></h2>
                 </div>
-
                 <div id="admin-upload-area" class="hidden bg-blue-50 p-10 rounded-[2.5rem] mb-12 text-center border-4 border-dashed border-blue-200">
                     <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
-                    <label for="bulk-files" class="bg-blue-600 text-white px-10 py-5 rounded-full font-black cursor-pointer hover:bg-blue-700 transition inline-block shadow-xl uppercase tracking-widest text-sm">SELECT PHOTOS TO UPLOAD</label>
-                    
+                    <label for="bulk-files" class="bg-blue-600 text-white px-10 py-5 rounded-full font-black cursor-pointer">UPLOAD PHOTOS</label>
                     <div id="upload-progress-container" class="hidden mt-8 max-w-md mx-auto">
-                        <div class="flex justify-between mb-2">
-                            <span id="progress-text" class="text-[10px] font-black text-blue-700 uppercase italic">Preparing Files...</span>
-                            <span id="progress-percent" class="text-sm font-black text-blue-700">0%</span>
-                        </div>
-                        <div class="w-full bg-blue-200 rounded-full h-3 overflow-hidden border border-blue-200">
-                            <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300 shadow-[0_0_10px_rgba(37,99,235,0.5)]" style="width: 0%"></div>
-                        </div>
+                        <div class="w-full bg-blue-200 rounded-full h-3 overflow-hidden"><div id="progress-bar" class="bg-blue-600 h-full w-0"></div></div>
                     </div>
                 </div>
-                
                 <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </main>
 
-        <footer class="max-w-6xl mx-auto w-full py-12 border-t border-gray-100 text-center space-y-4 mt-auto">
-            <div class="flex justify-center gap-6 text-gray-400 font-bold text-xs uppercase tracking-[0.2em]">
-                <a href="#" class="hover:text-blue-600 transition">Terms</a>
-                <a href="#" class="hover:text-blue-600 transition">Privacy</a>
-                <a href="https://instagram.com/byron.surf.clips" target="_blank" class="hover:text-pink-500 transition">@byron.surf.clips</a>
-            </div>
-            <p class="text-gray-300 text-[10px] font-medium tracking-widest uppercase">© Byron Surf Clips. All Rights Reserved.</p>
+        <footer class="mt-20 py-10 text-center border-t">
+            <p class="text-gray-400 text-xs font-bold">© BYRON SURF CLIPS | @byron.surf.clips</p>
         </footer>
     </section>
 
     <section id="packs-page" class="hidden flex-grow pt-24 p-6 bg-gray-900 text-white">
-        <h2 class="text-5xl font-black italic text-center mb-16 tracking-tighter">PHOTO PACKS</h2>
         <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto"></div>
-        <button onclick="backToHome()" class="mt-20 block mx-auto text-blue-400 font-bold uppercase tracking-widest hover:underline hover:text-blue-300 transition">← Exit to Home</button>
+        <button onclick="backToHome()" class="mt-20 block mx-auto text-blue-400 font-bold uppercase underline">Exit</button>
     </section>
 
-    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex justify-end">
-        <div class="bg-white w-full max-w-md h-full p-8 overflow-y-auto flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-3xl font-black italic tracking-tighter">YOUR CART</h2>
-                <button onclick="toggleCartModal()" class="text-gray-300 hover:text-black text-3xl font-bold transition">✕</button>
-            </div>
-            <div id="cart-items" class="grid grid-cols-2 gap-4 flex-grow content-start no-scrollbar overflow-y-auto"></div>
-            <div class="pt-6 border-t border-gray-100 mt-6">
-                <button id="checkout-btn" onclick="checkout()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl hover:bg-blue-700 transition shadow-xl uppercase tracking-widest">Checkout with Stripe</button>
-            </div>
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/80 flex justify-end">
+        <div class="bg-white w-full max-w-md h-full p-8 flex flex-col">
+            <h2 class="text-3xl font-black mb-10 italic">CART</h2>
+            <div id="cart-items" class="grid grid-cols-2 gap-4 flex-grow content-start overflow-y-auto"></div>
+            <button id="checkout-btn" onclick="checkout()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl mt-6">Stripe Checkout</button>
+            <button onclick="toggleCartModal()" class="mt-4 text-gray-400 text-xs font-bold uppercase">Close</button>
         </div>
     </div>
 
-    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 select-none">
-        <button onclick="prevPhoto()" class="absolute left-6 text-white text-5xl hover:text-blue-400 transition p-4">❮</button>
-        <div class="relative max-w-5xl w-full flex justify-center">
-            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10">
-            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain">
-        </div>
-        <button onclick="nextPhoto()" class="absolute right-6 text-white text-5xl hover:text-blue-400 transition p-4">❯</button>
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl hover:text-red-500 transition">✕</button>
+    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
+        <button onclick="prevPhoto()" class="absolute left-6 text-white text-5xl">❮</button>
+        <div class="relative"><img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl"><img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain"></div>
+        <button onclick="nextPhoto()" class="absolute right-6 text-white text-5xl">❯</button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl">✕</button>
     </div>
 
-    <script>
-        // === CREDENCIALES ===
-        const SUPA_URL = 'https://gmyptbfrpspzmyucqumz.supabase.co';
-        const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
-        const client = supabase.createClient(SUPA_URL, SUPA_KEY);
-        
-        const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
-        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null;
-        let defaultHeroBg = '';
-
-        async function init() {
-            await loadSiteSettings();
-            await checkUser();
-            await loadSessions();
-        }
-
-        async function loadSiteSettings() {
-            try {
-                const { data, error } = await client.from('site_settings').select('*').eq('id', 'main').single();
-                if (error) throw error;
-                if (data) {
-                    document.getElementById('hero-title').innerText = data.hero_title || 'CAPTURE THE WAVE';
-                    document.getElementById('hero-subtitle').innerText = data.hero_subtitle || '';
-                    if(data.hero_bg_url) {
-                        document.getElementById('hero-section').style.backgroundImage = `url('${data.hero_bg_url}')`;
-                        defaultHeroBg = data.hero_bg_url;
-                    }
-                    document.getElementById('edit-hero-title').value = data.hero_title || '';
-                    document.getElementById('edit-hero-subtitle').value = data.hero_subtitle || '';
-                }
-            } catch (err) {
-                console.error("Error loading site settings:", err.message);
-            }
-        }
-
-        async function updateSiteSettings() {
-            if(!isAdmin) return;
-            let finalBgUrl = defaultHeroBg;
-            const fileInput = document.getElementById('edit-hero-bg-file').files[0];
-            
-            try {
-                if (fileInput) {
-                    const { data, error: storageError } = await client.storage.from('clips').upload(`hero/${Date.now()}.jpg`, fileInput);
-                    if (storageError) throw new Error("Storage: " + storageError.message);
-                    finalBgUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-                }
-
-                const updates = {
-                    hero_title: document.getElementById('edit-hero-title').value,
-                    hero_subtitle: document.getElementById('edit-hero-subtitle').value,
-                    hero_bg_url: finalBgUrl
-                };
-
-                const { error: dbError } = await client.from('site_settings').update(updates).eq('id', 'main');
-                if (dbError) throw new Error("Database: " + dbError.message);
-
-                alert("Website updated successfully!");
-                location.reload();
-            } catch (err) {
-                alert("Error updating: " + err.message);
-            }
-        }
-
-        async function login() {
-            const email = document.getElementById('login-email').value;
-            const { error } = await client.auth.signInWithOtp({ 
-                email, 
-                options: { emailRedirectTo: 'https://byron-surf-clips.vercel.app' } 
-            });
-            if (error) alert("Error: " + error.message); else alert("Magic link sent!");
-        }
-
-        async function checkUser() {
-            const { data: { user } } = await client.auth.getUser();
-            if (user) {
-                if (user.email === "wildpauu@gmail.com") {
-                    isAdmin = true;
-                    document.getElementById('admin-panel').classList.remove('hidden');
-                }
-                document.getElementById('auth-ui').innerHTML = `<span class="text-xs font-black bg-blue-50 text-blue-600 px-4 py-2 rounded-xl border border-blue-100">${user.email}</span>`;
-            }
-        }
-
-        function exitAdmin() { 
-            isAdmin = false; 
-            document.getElementById('admin-panel').classList.add('hidden'); 
-        }
-
-        function hideAll() { ['hero-section', 'sessions-page', 'packs-page'].forEach(id => document.getElementById(id).classList.add('hidden')); }
-        function goToSessions() { hideAll(); document.getElementById('sessions-page').classList.remove('hidden'); showSessions(); }
-        function showPacks() { hideAll(); document.getElementById('packs-page').classList.remove('hidden'); loadPacks(); }
-        function backToHome() { hideAll(); document.getElementById('hero-section').classList.remove('hidden'); }
-        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
-
-        async function loadSessions() {
-            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
-            if (error) console.error("Error loading sessions:", error.message);
-            sessions = data || [];
-            document.getElementById('sessions-grid').innerHTML = sessions.map(s => `
-                <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-500 group">
-                    <div class="relative h-64 overflow-hidden">
-                        <img src="${s.cover_url || ''}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700 cursor-pointer" onclick="openGallery('${s.id}', '${s.location}')">
-                        <div class="absolute top-4 left-4 glass-effect px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-blue-600 shadow-sm border border-white/50">${s.time_range || 'Session'}</div>
-                    </div>
-                    <div class="p-8">
-                        <h3 class="font-black text-2xl mb-1 tracking-tighter">${s.location}</h3>
-                        <p class="text-gray-400 text-xs font-bold mb-6 uppercase tracking-widest">${s.date || ''}</p>
-                        <div class="flex gap-2">
-                            <button onclick="openGallery('${s.id}', '${s.location}')" class="flex-1 bg-gray-900 text-white py-4 rounded-2xl font-black text-xs hover:bg-blue-600 transition uppercase tracking-widest">VIEW GALLERY</button>
-                            ${isAdmin ? `<button onclick="deleteSession('${s.id}')" class="bg-red-50 text-red-500 p-4 rounded-2xl hover:bg-red-100 transition shadow-inner">🗑️</button>` : ''}
-                        </div>
-                    </div>
-                </div>`).join('');
-        }
-
-        async function createSession() {
-            const file = document.getElementById('new-cover-file').files[0];
-            const loc = document.getElementById('new-loc').value;
-            const time = document.getElementById('new-time').value;
-            const date = document.getElementById('new-date').value;
-            
-            if (!file || !loc) return alert("Cover image and Location are required.");
-
-            try {
-                const { data, error: storageError } = await client.storage.from('clips').upload(`covers/${Date.now()}.jpg`, file);
-                if (storageError) throw new Error("Storage: " + storageError.message);
-                
-                const coverUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-                const { error: dbError } = await client.from('sessions').insert([{ location: loc, time_range: time, date: date, cover_url: coverUrl }]);
-                if (dbError) throw new Error("Database: " + dbError.message);
-                
-                alert("Session published!");
-                location.reload();
-            } catch (err) {
-                alert("Error creating session: " + err.message);
-            }
-        }
-
-        async function deleteSession(id) {
-            if(confirm("Delete session and all photos?")) { await client.from('sessions').delete().eq('id', id); loadSessions(); }
-        }
-
-        async function openGallery(id, title) {
-            currentSessionId = id;
-            document.getElementById('sessions-grid-container').classList.add('hidden');
-            document.getElementById('view-gallery').classList.remove('hidden');
-            document.getElementById('gallery-header').innerText = title;
-            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
-            loadPhotos();
-        }
-
-        async function loadPhotos() {
-            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
-            currentPhotos = data || [];
-            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
-                <div class="relative group aspect-square rounded-[2rem] overflow-hidden border border-gray-100 shadow-sm bg-gray-100">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-700" onclick="openLightbox(${i})">
-                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain">
-                    <div class="absolute top-4 left-4">
-                        <input type="checkbox" class="w-6 h-6 rounded-full border-2 border-white cursor-pointer shadow-lg accent-blue-600" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.includes(p.url_watermarked) ? 'checked' : ''}>
-                    </div>
-                </div>`).join('');
-        }
-
-        async function handleBulkUpload(event) {
-            const files = Array.from(event.target.files);
-            if (!files.length || !isAdmin) return;
-            const container = document.getElementById('upload-progress-container');
-            container.classList.remove('hidden');
-            let uploadedCount = 0;
-            const uploadTask = async (file) => {
-                const fName = `watermarked/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-                const { data } = await client.storage.from('clips').upload(fName, file);
-                const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
-                await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
-                uploadedCount++;
-                const pct = Math.round((uploadedCount / files.length) * 100);
-                document.getElementById('progress-bar').style.width = `${pct}%`;
-                document.getElementById('progress-percent').innerText = `${pct}%`;
-                document.getElementById('progress-text').innerText = `Uploading ${uploadedCount}/${files.length}`;
-            };
-            for (let i = 0; i < files.length; i += 3) {
-                await Promise.all(files.slice(i, i + 3).map(f => uploadTask(f)));
-            }
-            setTimeout(() => { container.classList.add('hidden'); loadPhotos(); }, 1500);
-        }
-
-        function toggleCart(url, el) {
-            if(el.checked) cart.push(url); else cart = cart.filter(c => c !== url);
-            document.getElementById('cart-count').innerText = cart.length;
-            renderCart();
-        }
-        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
-        function renderCart() {
-            document.getElementById('cart-items').innerHTML = cart.map(url => `
-                <div class="relative aspect-square rounded-2xl overflow-hidden border shadow-inner bg-gray-50">
-                    <img src="${url}" class="w-full h-full object-cover">
-                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-20 pointer-events-none">
-                </div>`).join('');
-        }
-
-        function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
-        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
-        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
-        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
-        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
-
-        async function loadPacks() {
-            const { data } = await client.from('packs').select('*');
-            document.getElementById('packs-container').innerHTML = (data || []).map(p => `
-                <div class="bg-gray-800 p-12 rounded-[3rem] text-center border border-gray-700 shadow-2xl hover:border-blue-500 transition duration-500">
-                    <h3 class="text-2xl font-black italic mb-2 tracking-tighter">${p.name}</h3>
-                    <p class="text-blue-400 font-black text-[10px] tracking-[0.2em] mb-8 uppercase">${p.photos_count} PHOTOS</p>
-                    <div class="text-7xl font-black mb-10 tracking-tighter">$${p.price}<span class="text-sm font-bold text-gray-50 ml-2">AUD</span></div>
-                    <button onclick="goToSessions()" class="bg-blue-600 w-full py-5 rounded-2xl font-black hover:bg-blue-500 transition shadow-lg uppercase tracking-widest text-xs">SELECT PACK</button>
-                </div>`).join('');
-        }
-        
-        // === STRIPE CHECKOUT INTEGRATION ===
-        async function checkout() { 
-            if(cart.length === 0) return alert("Your cart is empty.");
-
-            const btn = document.getElementById('checkout-btn');
-            btn.innerText = "PROCESSING...";
-            btn.disabled = true;
-
-            try {
-                // Llama a la Edge Function de Supabase que conecta con Stripe
-                const { data, error } = await client.functions.invoke('create-checkout-session', {
-                    body: { items: cart } // Enviamos las URLs de las fotos del carrito
-                });
-
-                if (error) throw new Error(error.message);
-                
-                // Si Stripe devuelve la URL de pago, redirigimos al usuario allí
-                if (data && data.url) {
-                    window.location.href = data.url;
-                } else {
-                    throw new Error("No Stripe URL returned. Check your Edge Function.");
-                }
-
-            } catch (err) {
-                alert("Checkout Error: " + err.message);
-                btn.innerText = "CHECKOUT WITH STRIPE";
-                btn.disabled = false;
-            }
-        }
-
-        // INIT
-        init();
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
