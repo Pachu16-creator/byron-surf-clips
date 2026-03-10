@@ -136,7 +136,7 @@
             </div>
             <div id="cart-items" class="grid grid-cols-2 gap-4 flex-grow content-start no-scrollbar overflow-y-auto"></div>
             <div class="pt-6 border-t border-gray-100 mt-6">
-                <button onclick="checkout()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl hover:bg-blue-700 transition shadow-xl uppercase tracking-widest">Checkout with Stripe</button>
+                <button id="checkout-btn" onclick="checkout()" class="w-full bg-blue-600 text-white font-black py-5 rounded-3xl hover:bg-blue-700 transition shadow-xl uppercase tracking-widest">Checkout with Stripe</button>
             </div>
         </div>
     </div>
@@ -152,7 +152,7 @@
     </div>
 
     <script>
-        // === TUS CREDENCIALES EXACTAS ===
+        // === CREDENCIALES ===
         const SUPA_URL = 'https://gmyptbfrpspzmyucqumz.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
         const client = supabase.createClient(SUPA_URL, SUPA_KEY);
@@ -168,16 +168,21 @@
         }
 
         async function loadSiteSettings() {
-            const { data } = await client.from('site_settings').select('*').eq('id', 'main').single();
-            if (data) {
-                document.getElementById('hero-title').innerText = data.hero_title || 'CAPTURE THE WAVE';
-                document.getElementById('hero-subtitle').innerText = data.hero_subtitle || '';
-                if(data.hero_bg_url) {
-                    document.getElementById('hero-section').style.backgroundImage = `url('${data.hero_bg_url}')`;
-                    defaultHeroBg = data.hero_bg_url;
+            try {
+                const { data, error } = await client.from('site_settings').select('*').eq('id', 'main').single();
+                if (error) throw error;
+                if (data) {
+                    document.getElementById('hero-title').innerText = data.hero_title || 'CAPTURE THE WAVE';
+                    document.getElementById('hero-subtitle').innerText = data.hero_subtitle || '';
+                    if(data.hero_bg_url) {
+                        document.getElementById('hero-section').style.backgroundImage = `url('${data.hero_bg_url}')`;
+                        defaultHeroBg = data.hero_bg_url;
+                    }
+                    document.getElementById('edit-hero-title').value = data.hero_title || '';
+                    document.getElementById('edit-hero-subtitle').value = data.hero_subtitle || '';
                 }
-                document.getElementById('edit-hero-title').value = data.hero_title || '';
-                document.getElementById('edit-hero-subtitle').value = data.hero_subtitle || '';
+            } catch (err) {
+                console.error("Error loading site settings:", err.message);
             }
         }
 
@@ -186,18 +191,27 @@
             let finalBgUrl = defaultHeroBg;
             const fileInput = document.getElementById('edit-hero-bg-file').files[0];
             
-            if (fileInput) {
-                const { data, error } = await client.storage.from('clips').upload(`hero/${Date.now()}.jpg`, fileInput);
-                if (!error) finalBgUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-            }
+            try {
+                if (fileInput) {
+                    const { data, error: storageError } = await client.storage.from('clips').upload(`hero/${Date.now()}.jpg`, fileInput);
+                    if (storageError) throw new Error("Storage: " + storageError.message);
+                    finalBgUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
+                }
 
-            const updates = {
-                hero_title: document.getElementById('edit-hero-title').value,
-                hero_subtitle: document.getElementById('edit-hero-subtitle').value,
-                hero_bg_url: finalBgUrl
-            };
-            await client.from('site_settings').update(updates).eq('id', 'main');
-            location.reload();
+                const updates = {
+                    hero_title: document.getElementById('edit-hero-title').value,
+                    hero_subtitle: document.getElementById('edit-hero-subtitle').value,
+                    hero_bg_url: finalBgUrl
+                };
+
+                const { error: dbError } = await client.from('site_settings').update(updates).eq('id', 'main');
+                if (dbError) throw new Error("Database: " + dbError.message);
+
+                alert("Website updated successfully!");
+                location.reload();
+            } catch (err) {
+                alert("Error updating: " + err.message);
+            }
         }
 
         async function login() {
@@ -232,7 +246,8 @@
         function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
 
         async function loadSessions() {
-            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
+            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
+            if (error) console.error("Error loading sessions:", error.message);
             sessions = data || [];
             document.getElementById('sessions-grid').innerHTML = sessions.map(s => `
                 <div class="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-500 group">
@@ -256,14 +271,22 @@
             const loc = document.getElementById('new-loc').value;
             const time = document.getElementById('new-time').value;
             const date = document.getElementById('new-date').value;
+            
             if (!file || !loc) return alert("Cover image and Location are required.");
 
-            const { data, error } = await client.storage.from('clips').upload(`covers/${Date.now()}.jpg`, file);
-            if (error) return alert("Upload failed: " + error.message);
-            
-            const coverUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-            await client.from('sessions').insert([{ location: loc, time_range: time, date: date, cover_url: coverUrl }]);
-            location.reload();
+            try {
+                const { data, error: storageError } = await client.storage.from('clips').upload(`covers/${Date.now()}.jpg`, file);
+                if (storageError) throw new Error("Storage: " + storageError.message);
+                
+                const coverUrl = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
+                const { error: dbError } = await client.from('sessions').insert([{ location: loc, time_range: time, date: date, cover_url: coverUrl }]);
+                if (dbError) throw new Error("Database: " + dbError.message);
+                
+                alert("Session published!");
+                location.reload();
+            } catch (err) {
+                alert("Error creating session: " + err.message);
+            }
         }
 
         async function deleteSession(id) {
@@ -341,16 +364,42 @@
                 <div class="bg-gray-800 p-12 rounded-[3rem] text-center border border-gray-700 shadow-2xl hover:border-blue-500 transition duration-500">
                     <h3 class="text-2xl font-black italic mb-2 tracking-tighter">${p.name}</h3>
                     <p class="text-blue-400 font-black text-[10px] tracking-[0.2em] mb-8 uppercase">${p.photos_count} PHOTOS</p>
-                    <div class="text-7xl font-black mb-10 tracking-tighter">$${p.price}<span class="text-sm font-bold text-gray-500 ml-2">AUD</span></div>
+                    <div class="text-7xl font-black mb-10 tracking-tighter">$${p.price}<span class="text-sm font-bold text-gray-50 ml-2">AUD</span></div>
                     <button onclick="goToSessions()" class="bg-blue-600 w-full py-5 rounded-2xl font-black hover:bg-blue-500 transition shadow-lg uppercase tracking-widest text-xs">SELECT PACK</button>
                 </div>`).join('');
         }
         
-        function checkout() { 
-            if(cart.length === 0) return alert("Cart is empty");
-            alert("Redirecting to Secure Payment for " + cart.length + " photos..."); 
+        // === STRIPE CHECKOUT INTEGRATION ===
+        async function checkout() { 
+            if(cart.length === 0) return alert("Your cart is empty.");
+
+            const btn = document.getElementById('checkout-btn');
+            btn.innerText = "PROCESSING...";
+            btn.disabled = true;
+
+            try {
+                // Llama a la Edge Function de Supabase que conecta con Stripe
+                const { data, error } = await client.functions.invoke('create-checkout-session', {
+                    body: { items: cart } // Enviamos las URLs de las fotos del carrito
+                });
+
+                if (error) throw new Error(error.message);
+                
+                // Si Stripe devuelve la URL de pago, redirigimos al usuario allí
+                if (data && data.url) {
+                    window.location.href = data.url;
+                } else {
+                    throw new Error("No Stripe URL returned. Check your Edge Function.");
+                }
+
+            } catch (err) {
+                alert("Checkout Error: " + err.message);
+                btn.innerText = "CHECKOUT WITH STRIPE";
+                btn.disabled = false;
+            }
         }
 
+        // INIT
         init();
     </script>
 </body>
