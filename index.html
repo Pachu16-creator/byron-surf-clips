@@ -49,6 +49,28 @@
             <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300 shadow-xl">Find My Shot</button>
         </section>
 
+        <section id="success-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center px-6 h-screen">
+            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
+                <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="font-serif text-4xl font-bold mb-4 text-gray-900">Payment Successful!</h2>
+                <p class="text-gray-500 mb-8 font-medium">Thank you for your purchase. We are processing your order and you will receive an email shortly with the secure link to download your high-resolution photos.</p>
+                <button onclick="showPage('landing-page')" class="w-full bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-black transition uppercase tracking-widest text-sm">Return to Home</button>
+            </div>
+        </section>
+
+        <section id="cancel-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center px-6 h-screen">
+            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
+                <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                    <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </div>
+                <h2 class="font-serif text-4xl font-bold mb-4 text-gray-900">Checkout Cancelled</h2>
+                <p class="text-gray-500 mb-8 font-medium">Your payment process was cancelled and no charges were made. Your photos are still saved in your cart whenever you're ready.</p>
+                <button onclick="showPage('sessions-page')" class="w-full bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-black transition uppercase tracking-widest text-sm">Browse Sessions</button>
+            </div>
+        </section>
+
         <section id="sessions-page" class="hidden pt-32 px-6 max-w-7xl mx-auto pb-20">
             <section id="admin-panel" class="hidden bg-white p-8 rounded-3xl shadow-sm mb-10 border border-gray-200">
                 <div class="flex justify-between items-center mb-6">
@@ -68,18 +90,15 @@
             <div id="sessions-grid-container">
                 <h2 class="font-serif text-5xl font-bold mb-4">Find My Shot</h2>
                 <p class="text-gray-500 mb-8">Browse recent sessions and find yourself in the waves.</p>
-                
                 <section class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
                     <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
                     <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
                 </section>
-                
                 <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
             
             <div id="view-gallery" class="hidden">
                 <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest transition">← Back to Find My Shot</button>
-                
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
                     <div class="flex items-center gap-4">
@@ -90,13 +109,11 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="upload-progress-container" class="hidden mb-8 max-w-md">
                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                 </div>
-                
                 <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </section>
@@ -178,11 +195,11 @@
         </div>
     </div>
 
-<div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
+    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
         <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
-            <div class="watermark-overlay opacity-30"></div>
+            <div class="watermark-overlay opacity-30 pointer-events-none"></div>
         </div>
         <button onclick="nextPhoto()" class="absolute right-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
@@ -196,14 +213,13 @@
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0;
         let isAdmin = false, currentSessionId = null, currentPrice = 20;
 
-        // --- SISTEMA DE PÁGINAS Y NAVEGACIÓN ---
         function showPage(pageId) {
-            ['landing-page', 'sessions-page', 'packs-page', 'contact-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'success-page', 'cancel-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
             window.scrollTo(0,0);
             
             const nav = document.getElementById('main-nav');
-            if(pageId === 'landing-page') {
+            if(pageId === 'landing-page' || pageId === 'success-page' || pageId === 'cancel-page') {
                 nav.classList.add('text-white'); 
                 nav.classList.remove('text-gray-900', 'bg-white/90', 'border-b', 'shadow-sm');
             } else {
@@ -213,6 +229,25 @@
 
             if(pageId === 'sessions-page') loadSessions();
             if(pageId === 'packs-page') loadPacks();
+        }
+
+        // --- SISTEMA DE LECTURA DE URL PARA STRIPE ---
+        function checkUrlStatus() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+            
+            if (status === 'success') {
+                showPage('success-page');
+                cart = []; // Vaciamos el carrito tras pagar
+                updateCartUI();
+                // Limpiamos la URL para que no recargue siempre en success
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (status === 'cancel') {
+                showPage('cancel-page');
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else {
+                showPage('landing-page');
+            }
         }
 
         async function loadSiteSettings() {
@@ -234,7 +269,6 @@
             }
         }
 
-        // --- AUTENTICACIÓN (ADMIN) ---
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
             if (user && user.email === "wildpauu@gmail.com") {
@@ -255,6 +289,7 @@
             
             const { error } = await client.auth.signInWithOtp({ 
                 email, 
+                // ESTO USA EL NUEVO DOMINIO DINÁMICAMENTE
                 options: { emailRedirectTo: window.location.origin } 
             });
             
@@ -272,7 +307,6 @@
         
         async function logout() { await client.auth.signOut(); location.reload(); }
 
-        // --- GESTIÓN DE SESIONES ---
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             sessions = data || [];
@@ -329,7 +363,6 @@
             }
         }
 
-        // --- GALERÍA DE FOTOS ---
         async function openGallery(id, title, price) {
             currentSessionId = id; 
             currentPrice = price || 20;
@@ -347,18 +380,15 @@
             document.getElementById('sessions-grid-container').classList.remove('hidden'); 
         }
 
-async function loadPhotos() {
+        async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             currentPhotos = data || [];
             
             document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
                 <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
-                    
-                    <div class="watermark-overlay"></div>
-                    
+                    <div class="watermark-overlay pointer-events-none"></div>
                     <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
-                    
                     <div class="absolute top-3 left-3 z-10">
                         <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
                     </div>
@@ -410,7 +440,6 @@ async function loadPhotos() {
             }, 1000);
         }
 
-        // --- CARRITO Y PAGOS STRIPE ---
         function toggleCart(url, el) {
             if(el.checked) cart.push({url, price: currentPrice}); 
             else cart = cart.filter(c => c.url !== url);
@@ -423,10 +452,10 @@ async function loadPhotos() {
             document.getElementById('cart-count').innerText = cart.length;
             
             document.getElementById('cart-items').innerHTML = cart.map(c => `
-                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
                     <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                        <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false" oncontextmenu="return false;">
-                        <div class="watermark-overlay"></div>
+                        <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false">
+                        <div class="watermark-overlay pointer-events-none"></div>
                     </div>
                     <div class="flex-grow">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
@@ -440,7 +469,6 @@ async function loadPhotos() {
             let discount = 0;
             let discountName = "";
 
-            // Lógica de Descuentos (Ajustable a los precios de tu web)
             if (cart.length >= 10) {
                 discountName = "Full Collection";
                 finalAmount = 150 + ((cart.length - 10) * (cart[0]?.price || 20)); 
@@ -466,14 +494,12 @@ async function loadPhotos() {
             document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
             document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
             
-            // Guardamos globalmente para Stripe
             window.currentFinalPrice = finalAmount;
         }
 
         function removeFromCart(url) {
             cart = cart.filter(c => c.url !== url);
             updateCartUI();
-            // Si la galería está abierta, refrescamos visualmente los checkboxes
             if(currentSessionId) loadPhotos(); 
         }
 
@@ -510,7 +536,6 @@ async function loadPhotos() {
             }
         }
 
-        // --- LIGHTBOX Y PACKS ---
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
@@ -531,8 +556,7 @@ async function loadPhotos() {
         // --- INICIALIZACIÓN ---
         loadSiteSettings();
         checkUser();
-        showPage('landing-page');
+        checkUrlStatus(); 
     </script>
 </body>
 </html>
-
