@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Byron Surf Clips</title>
+    <title>Byron Surf Clips | Capture the Wave</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,7 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; opacity: 0.2; pointer-events: none; }
+        .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col relative text-gray-900">
@@ -43,14 +43,12 @@
                     ⚙️ Change BG <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)">
                 </label>
             </div>
-
             <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4 tracking-tighter">Byron Surf Clips</h1>
             <p class="text-lg md:text-xl mb-10 max-w-lg opacity-90 font-light">Capturing the essence of Byron Bay's waves.</p>
             <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300">Find My Shot</button>
         </section>
 
         <section id="sessions-page" class="hidden pt-32 px-6 max-w-7xl mx-auto pb-20">
-            
             <section id="admin-panel" class="hidden bg-white p-8 rounded-3xl shadow-sm mb-10 border border-gray-100">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="font-black text-xl text-blue-900 uppercase italic">Admin: New Session</h2>
@@ -74,12 +72,11 @@
                     <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
                     <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
                 </section>
-
                 <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
             
             <div id="view-gallery" class="hidden">
-                <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest">← Back to Sessions</button>
+                <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest">← Back to Find My Shot</button>
                 
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
@@ -97,7 +94,6 @@
                         <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
                 </div>
-                
                 <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </section>
@@ -105,7 +101,6 @@
         <section id="contact-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center">
             <h2 class="font-serif text-5xl font-bold mb-6 text-gray-900">Get In Touch</h2>
             <p class="text-gray-500 max-w-md mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
-            
             <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
                 <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002 2H5a2 2 0 00-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z" stroke-width="1.5"></path></svg>
@@ -135,17 +130,14 @@
                 <button onclick="showPage('packs-page')" class="hover:text-white">Packs</button>
                 <button onclick="showPage('contact-page')" class="hover:text-white">Contact</button>
             </div>
-            <a href="https://instagram.com" class="text-gray-400 hover:text-white">
+            <a href="https://instagram.com/byron.surf.clips" target="_blank" class="text-gray-400 hover:text-white">
                 <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
             </a>
-        </div>
-        <div class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-500 text-[10px] tracking-widest uppercase">
-            © 2026 Byron Surf Clips. All rights reserved.
         </div>
     </footer>
 
     <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-sm text-center relative">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-sm text-center relative shadow-2xl">
             <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✕</button>
             <h3 class="font-serif text-2xl mb-4">Admin Access</h3>
             <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 rounded-xl outline-none mb-4">
@@ -167,14 +159,14 @@
                     <span id="cart-subtotal">$0 AUD</span>
                 </div>
                 <div id="pack-discount-row" class="hidden flex justify-between text-emerald-500 text-sm font-bold mb-4">
-                    <span>Pack Discount</span>
+                    <span>Pack Discount (Starter Pack)</span>
                     <span id="cart-discount">-$0 AUD</span>
                 </div>
                 <div class="flex justify-between items-center font-bold text-xl mb-6 mt-4">
                     <span>Total</span>
                     <span id="cart-total" class="text-3xl font-serif">$0 AUD</span>
                 </div>
-                <button onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg flex justify-center gap-2 items-center">
+                <button id="checkout-btn" onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg flex justify-center gap-2 items-center">
                     <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2h3a1 1 0 100-2h-3z"></path></svg>
                     Pay <span id="pay-btn-amt">$0 AUD</span>
                 </button>
@@ -187,19 +179,17 @@
         <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10">
-            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain">
+            <div class="watermark-overlay opacity-30"></div>
         </div>
         <button onclick="nextPhoto()" class="absolute right-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
     </div>
 
     <script>
-        // TU LÓGICA ORIGINAL INTACTA
         const SUPA_URL = 'https://gmyptbfrpspzmyucqumz.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
         const client = supabase.createClient(SUPA_URL, SUPA_KEY);
         
-        const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null, currentPrice = 10;
 
         // NAVEGACIÓN Y NAVBAR COLOR
@@ -219,21 +209,17 @@
             if(pageId === 'packs-page') loadPacks();
         }
 
-        // CARGAR SETTINGS Y HERO BG
         async function loadSiteSettings() {
             const { data } = await client.from('site_settings').select('*').eq('id', 'main').single();
-            if (data?.hero_bg_url) {
-                document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
-            }
+            if (data?.hero_bg_url) document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
         }
 
         async function updateHeroBg(event) {
             const file = event.target.files[0];
             if (!file) return;
-            const fName = `hero/${Date.now()}-${file.name}`;
-            const { error } = await client.storage.from('clips').upload(fName, file);
+            const { error, data } = await client.storage.from('clips').upload(`hero/${Date.now()}-${file.name}`, file);
             if (!error) {
-                const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
+                const url = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
                 await client.from('site_settings').upsert({ id: 'main', hero_bg_url: url });
                 alert("Hero background updated!");
                 location.reload();
@@ -247,7 +233,6 @@
                 isAdmin = true;
                 document.getElementById('admin-panel').classList.remove('hidden');
                 document.getElementById('hero-admin-btn').classList.remove('hidden');
-                document.getElementById('admin-upload-area').classList.remove('hidden');
                 document.getElementById('admin-email-display').innerText = user.email;
             }
         }
@@ -262,8 +247,7 @@
 
         // SESSIONS
         async function loadSessions() {
-            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
-            if (error) { console.error("Error loading sessions", error); return; }
+            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             sessions = data || [];
             renderSessions(sessions);
         }
@@ -274,11 +258,11 @@
                     <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-56 object-cover">
                     <div class="p-5">
                         <h3 class="font-serif font-bold text-2xl text-gray-900 mb-2">${s.location}</h3>
-                        <div class="flex gap-4 text-xs text-gray-500 font-medium">
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${s.location}</span>
-                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${s.date || 'Recent'}</span>
+                        <div class="flex gap-4 text-[11px] text-gray-500 font-bold uppercase tracking-widest">
+                            <span>📍 ${s.location}</span>
+                            <span>📅 ${s.date || 'Recent'}</span>
                         </div>
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
         }
@@ -313,6 +297,7 @@
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
             document.getElementById('gallery-price-tag').innerText = `$${currentPrice} AUD / Photo`;
+            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
             loadPhotos();
         }
 
@@ -359,20 +344,18 @@
             let uploadedCount = 0;
 
             for (const file of files) {
-                const fName = `watermarked/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-                const { error } = await client.storage.from('clips').upload(fName, file);
+                const { error, data } = await client.storage.from('clips').upload(`watermarked/${Date.now()}-${file.name}`, file);
                 if (!error) {
-                    const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
+                    const url = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
                     await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
                 }
                 uploadedCount++;
                 document.getElementById('progress-bar').style.width = `${Math.round((uploadedCount / files.length) * 100)}%`;
             }
-
             setTimeout(() => { container.classList.add('hidden'); document.getElementById('progress-bar').style.width = '0%'; loadPhotos(); }, 1000);
         }
 
-        // CARRITO MEJORADO CON DESCUENTOS
+        // --- CARRITO Y CÁLCULO DE DESCUENTOS EXACTO ---
         function toggleCart(url, el) {
             if(el.checked) cart.push({url, price: currentPrice}); 
             else cart = cart.filter(c => c.url !== url);
@@ -384,7 +367,6 @@
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             
-            // Render Lista de items
             document.getElementById('cart-items').innerHTML = cart.map(c => `
                 <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
                     <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
@@ -398,16 +380,18 @@
                     <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
                 </div>`).join('');
 
-            // Cálculos
             const subtotal = cart.reduce((a, b) => a + b.price, 0);
             let final = subtotal;
             let discount = 0;
 
-            if (cart.length >= 2) {
+            // Lógica exacta de tu foto: Si el cliente elige 2 o más fotos, el Total baja a 1 AUD (para pruebas)
+            // Cuando quieras cobrar de verdad, cambia el TEST_PRICE_CAP al precio de tu pack real (ej: 50)
+            const TEST_PRICE_CAP = 1; 
+
+            if (cart.length >= 2 && subtotal > TEST_PRICE_CAP) {
                 document.getElementById('pack-discount-row').classList.remove('hidden');
-                discount = subtotal - 50; // Ejemplo: Si el pack cuesta 50 AUD
-                if(discount < 0) discount = 0; // Previene que el descuento sea negativo
-                final = subtotal - discount;
+                discount = subtotal - TEST_PRICE_CAP; 
+                final = TEST_PRICE_CAP;
             } else {
                 document.getElementById('pack-discount-row').classList.add('hidden');
             }
@@ -422,35 +406,56 @@
         function removeFromCart(url) {
             cart = cart.filter(c => c.url !== url);
             updateCartUI();
-            loadPhotos(); // Refresca los checkboxes de la galería
+            loadPhotos(); // Refresca los checkboxes visualmente
         }
 
-        // MANTIENE TU LÓGICA DE STRIPE
+        // --- CHECKOUT STRIPE CON MANEJO DE ERRORES ---
         async function checkout() {
-            if(!cart.length) return alert("Cart is empty");
-            const btn = document.querySelector('#cart-modal button.bg-[#1e608d]');
-            btn.innerText = "REDIRECTING...";
+            if(!cart.length) return alert("Your cart is empty.");
+            const btn = document.getElementById('checkout-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "REDIRECTING TO SECURE PAYMENT...";
+            btn.disabled = true;
             
-            // Mandamos solo el array de URLs a tu Edge Function como pedía el código original
-            const cartUrls = cart.map(c => c.url);
-            
-            const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
-                body: JSON.stringify({ photos: cartUrls })
-            });
-            const data = await res.json();
-            if(data.url) window.location.href = data.url; 
-            else { alert("Checkout error"); btn.innerText = "Checkout with Stripe"; }
+            try {
+                // Tu Edge Function esperaba un array simple de URLs
+                const cartUrls = cart.map(c => c.url);
+                
+                const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+                    body: JSON.stringify({ photos: cartUrls })
+                });
+
+                if (!res.ok) {
+                    const errText = await res.text();
+                    throw new Error(`Server returned ${res.status}: ${errText}`);
+                }
+
+                const data = await res.json();
+                
+                if (data && data.url) {
+                    window.location.href = data.url; 
+                } else {
+                    throw new Error(data.error || "No URL returned from Stripe.");
+                }
+
+            } catch (error) {
+                alert("Checkout Error: " + error.message + "\n\nPor favor, revisa los logs de tu Edge Function en Supabase.");
+                console.error("Detalle del error:", error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
-        // LIGHTBOX Y PACKS (Igual)
+        // LIGHTBOX
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
         function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
         function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
 
+        // PACKS
         async function loadPacks() {
             const { data } = await client.from('packs').select('*').order('id');
             document.getElementById('packs-container').innerHTML = (data || []).map(p => `
