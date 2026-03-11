@@ -58,7 +58,7 @@
                     <input type="text" id="new-loc" placeholder="Location (e.g. Wategos)" class="border p-3 rounded-xl text-sm outline-none">
                     <input type="text" id="new-time" placeholder="Time (e.g. 6am - 8am)" class="border p-3 rounded-xl text-sm outline-none">
                     <input type="date" id="new-date" class="border p-3 rounded-xl text-sm outline-none">
-                    <input type="number" id="new-price" placeholder="Price ($)" class="border p-3 rounded-xl text-sm outline-none">
+                    <input type="number" id="new-price" placeholder="Base Price ($)" class="border p-3 rounded-xl text-sm outline-none">
                     <button onclick="createSession()" class="bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">Publish Session</button>
                 </div>
                 <button onclick="logout()" class="mt-4 text-xs text-red-500 font-bold hover:underline">Sign Out</button>
@@ -67,7 +67,6 @@
             <div id="sessions-grid-container">
                 <h2 class="font-serif text-5xl font-bold mb-4">Find My Shot</h2>
                 <p class="text-gray-500 mb-8">Browse recent sessions and find yourself in the waves.</p>
-                
                 <section class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
                     <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
                     <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
@@ -77,7 +76,6 @@
             
             <div id="view-gallery" class="hidden">
                 <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest">← Back to Find My Shot</button>
-                
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
                     <div class="flex items-center gap-4">
@@ -88,7 +86,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div id="upload-progress-container" class="hidden mb-8 max-w-md">
                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
@@ -159,7 +156,7 @@
                     <span id="cart-subtotal">$0 AUD</span>
                 </div>
                 <div id="pack-discount-row" class="hidden flex justify-between text-emerald-500 text-sm font-bold mb-4">
-                    <span>Pack Discount</span>
+                    <span id="pack-name">Pack Discount</span>
                     <span id="cart-discount">-$0 AUD</span>
                 </div>
                 <div class="flex justify-between items-center font-bold text-xl mb-6 mt-4">
@@ -190,7 +187,7 @@
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
         const client = supabase.createClient(SUPA_URL, SUPA_KEY);
         
-        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null, currentPrice = 10;
+        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null, currentPrice = 20;
 
         function showPage(pageId) {
             ['landing-page', 'sessions-page', 'packs-page', 'contact-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -234,15 +231,16 @@
                 document.getElementById('admin-email-display').innerText = user.email;
             }
         }
+
         async function login() {
             const email = document.getElementById('login-email').value;
             if(!email) return alert("Enter email first");
             const { error } = await client.auth.signInWithOtp({ email });
             if (!error) alert("Magic link sent! Check your inbox.");
-            else alert(error.message);
         }
         async function logout() { await client.auth.signOut(); location.reload(); }
 
+        // SESSIONS AÑADIDO FRANJA HORARIA
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             sessions = data || [];
@@ -251,17 +249,15 @@
 
         function renderSessions(list) {
             document.getElementById('sessions-grid').innerHTML = list.map(s => `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 10})">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 20})">
                     <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-56 object-cover">
                     <div class="p-5">
-                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-3">${s.location}</h3>
-                        
-                        <div class="flex flex-wrap gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
-                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">📍 ${s.location}</span>
-                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">📅 ${s.date || 'Recent'}</span>
-                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">⏰ ${s.time_range || 'All Day'}</span>
+                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-4">${s.location}</h3>
+                        <div class="flex flex-wrap gap-2 text-[10px] text-gray-600 font-bold uppercase tracking-wider">
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${s.location}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${s.date || 'Recent'}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${s.time_range || 'Morning'}</span>
                         </div>
-
                         ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
@@ -278,7 +274,7 @@
             const location = document.getElementById('new-loc').value;
             const time_range = document.getElementById('new-time').value;
             const date = document.getElementById('new-date').value;
-            const price = document.getElementById('new-price').value || 10;
+            const price = document.getElementById('new-price').value || 20; // Base 20 por foto
             const { error } = await client.from('sessions').insert([{ location, time_range, date, price }]);
             if (!error) { alert("Session published!"); loadSessions(); }
         }
@@ -290,8 +286,9 @@
             }
         }
 
+        // GALLERY
         async function openGallery(id, title, price) {
-            currentSessionId = id; currentPrice = price || 10;
+            currentSessionId = id; currentPrice = price || 20;
             document.getElementById('sessions-grid-container').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
@@ -354,7 +351,7 @@
             setTimeout(() => { container.classList.add('hidden'); document.getElementById('progress-bar').style.width = '0%'; loadPhotos(); }, 1000);
         }
 
-        // --- CARRITO ---
+        // --- CARRITO Y MATEMÁTICAS EXACTAS ---
         function toggleCart(url, el) {
             if(el.checked) cart.push({url, price: currentPrice}); 
             else cart = cart.filter(c => c.url !== url);
@@ -382,13 +379,24 @@
             const subtotal = cart.reduce((a, b) => a + b.price, 0);
             let finalAmount = subtotal;
             let discount = 0;
+            let discountName = "";
 
-            const TEST_PRICE_CAP = 1; 
+            // Lógica basada en tu imagen: 2 fotos=$30, 5=$90, 10=$150
+            if (cart.length >= 10) {
+                discountName = "Full Collection";
+                finalAmount = 150 + ((cart.length - 10) * cart[0].price); 
+            } else if (cart.length >= 5) {
+                discountName = "Session Pack";
+                finalAmount = 90 + ((cart.length - 5) * cart[0].price);
+            } else if (cart.length >= 2) {
+                discountName = "Starter Pack";
+                finalAmount = 30 + ((cart.length - 2) * cart[0].price);
+            }
 
-            if (cart.length >= 2 && subtotal > TEST_PRICE_CAP) {
+            if (finalAmount < subtotal) {
+                discount = subtotal - finalAmount;
                 document.getElementById('pack-discount-row').classList.remove('hidden');
-                discount = subtotal - TEST_PRICE_CAP; 
-                finalAmount = TEST_PRICE_CAP;
+                document.getElementById('pack-name').innerText = `Pack Discount (${discountName})`;
             } else {
                 document.getElementById('pack-discount-row').classList.add('hidden');
             }
@@ -399,7 +407,7 @@
             document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
             document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
             
-            // Guardamos el precio final en una variable global para mandarla a Stripe
+            // GUARDAMOS EL PRECIO PARA MANDARLO AL SERVIDOR
             window.currentFinalPrice = finalAmount;
         }
 
@@ -409,50 +417,44 @@
             loadPhotos();
         }
 
-        // --- CHECKOUT ACTUALIZADO ---
+        // --- CHECKOUT ENVIANDO EL PRECIO A SUPABASE ---
         async function checkout() {
             if(!cart.length) return alert("Your cart is empty.");
             
             const btn = document.getElementById('checkout-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "REDIRECTING...";
+            btn.innerHTML = "REDIRECTING TO SECURE PAYMENT...";
             btn.disabled = true;
             
             try {
                 const cartUrls = cart.map(c => c.url);
                 
-                // AQUÍ ESTÁ LA CLAVE: Enviamos "amount" a tu Edge Function
+                // Enviamos 'photos' (el array) y 'amount' (el precio exacto calculado)
                 const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
                     body: JSON.stringify({ 
                         photos: cartUrls,
-                        amount: window.currentFinalPrice // Esto le dice a tu servidor que cobre $1
+                        amount: window.currentFinalPrice
                     })
                 });
-
-                if (!res.ok) {
-                    const errText = await res.text();
-                    throw new Error(`Server returned ${res.status}: ${errText}`);
-                }
 
                 const data = await res.json();
                 
                 if (data && data.url) {
                     window.location.href = data.url; 
                 } else {
-                    throw new Error(data.error || "No URL returned from Stripe.");
+                    throw new Error(data.error || "No Stripe session returned");
                 }
 
             } catch (error) {
-                alert("Checkout Error: " + error.message + "\n\nTienes que actualizar tu Edge Function para que lea el 'amount' que le estamos enviando.");
-                console.error(error);
+                alert("Checkout Error: " + error.message + "\n\nPor favor, actualiza tu Edge Function para leer el 'amount'.");
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
 
-        // LIGHTBOX Y PACKS
+        // LIGHTBOX
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
@@ -470,7 +472,6 @@
                 </div>`).join('');
         }
 
-        // BOOTSTRAP
         loadSiteSettings();
         checkUser();
         showPage('landing-page');
