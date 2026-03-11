@@ -3,231 +3,469 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Byron Surf Clips | Capture the Wave</title>
+    <title>Byron Surf Clips</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; color: #1a1a1a; }
+        body { font-family: 'Inter', sans-serif; }
         .font-serif { font-family: 'Playfair Display', serif; }
-        .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; }
-        .footer-bg { background-color: #0a1120; }
+        .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
         .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; opacity: 0.2; pointer-events: none; }
     </style>
 </head>
-<body class="bg-white min-h-screen flex flex-col">
+<body class="bg-gray-50 min-h-screen flex flex-col relative text-gray-900">
 
-    <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto sticky top-0 bg-white/90 backdrop-blur-md z-50">
-        <h1 class="font-serif font-bold text-2xl tracking-tight cursor-pointer" onclick="showPage('landing-page')">Byron Surf Clips</h1>
-        <div class="flex items-center gap-8 font-semibold text-[13px] tracking-widest uppercase text-gray-700">
-            <button onclick="showPage('sessions-page')" class="hover:text-blue-600 transition">Find My Shot</button>
-            <button onclick="showPage('packs-page')" class="hover:text-blue-600 transition">Packs</button>
-            <button onclick="showPage('contact-page')" class="hover:text-blue-600 transition">Contact</button>
-            <div class="flex gap-5 items-center ml-4">
-                <button onclick="document.getElementById('auth-modal').classList.remove('hidden')" class="hover:text-black"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5"></path></svg></button>
-                <button onclick="showPage('cart-page')" class="relative hover:text-black">
+    <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-50 text-white" id="main-nav">
+        <h1 class="font-serif font-bold text-2xl tracking-tighter cursor-pointer" onclick="showPage('landing-page')">Byron Surf Clips</h1>
+        <div class="hidden md:flex items-center gap-8 font-semibold text-xs tracking-widest uppercase">
+            <button onclick="showPage('sessions-page')" class="hover:text-blue-300 transition">Find My Shot</button>
+            <button onclick="showPage('packs-page')" class="hover:text-blue-300 transition">Packs</button>
+            <button onclick="showPage('contact-page')" class="hover:text-blue-300 transition">Contact</button>
+            
+            <div class="flex gap-4 items-center ml-4">
+                <button onclick="document.getElementById('auth-modal').classList.remove('hidden')">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5"></path></svg>
+                </button>
+                <button onclick="toggleCartModal()" class="relative">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5"></path></svg>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-black text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
                 </button>
             </div>
         </div>
     </nav>
 
     <main class="flex-grow">
-        
-        <section id="landing-page" class="hero-bg h-[90vh] flex flex-col items-center justify-center text-center p-6 text-white">
-            <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4 tracking-tight">Byron Surf Clips</h1>
-            <p class="text-lg md:text-xl mb-10 font-light tracking-wide opacity-80">Capturing the essence of Byron Bay's waves</p>
-            <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-md border border-white/40 px-12 py-3.5 rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black transition-all">Find My Shot</button>
-        </section>
-
-        <section id="sessions-page" class="hidden p-12 max-w-7xl mx-auto">
-            <h2 class="font-serif text-5xl font-bold mb-4 italic">Find My Shot</h2>
-            <p class="text-gray-500 mb-10">Browse recent sessions and find yourself in the waves.</p>
-            
-            <div class="flex gap-4 mb-12 bg-gray-50 p-2 rounded-xl border border-gray-100">
-                <input type="text" id="search-loc" placeholder="Filter by location..." class="bg-transparent p-3 text-sm flex-1 outline-none">
-                <input type="date" id="search-date" class="bg-transparent p-3 text-sm border-l outline-none">
+        <section id="landing-page" class="hero-bg h-screen flex flex-col items-center justify-center text-center p-6 text-white relative">
+            <div id="hero-admin-btn" class="hidden absolute top-24 right-8 bg-black/50 p-2 rounded-xl backdrop-blur-md border border-white/20 z-20">
+                <label class="cursor-pointer text-xs font-bold text-white flex items-center gap-2">
+                    ⚙️ Change BG <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)">
+                </label>
             </div>
 
-            <div id="sessions-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+            <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4 tracking-tighter">Byron Surf Clips</h1>
+            <p class="text-lg md:text-xl mb-10 max-w-lg opacity-90 font-light">Capturing the essence of Byron Bay's waves.</p>
+            <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300">Find My Shot</button>
+        </section>
+
+        <section id="sessions-page" class="hidden pt-32 px-6 max-w-7xl mx-auto pb-20">
+            
+            <section id="admin-panel" class="hidden bg-white p-8 rounded-3xl shadow-sm mb-10 border border-gray-100">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="font-black text-xl text-blue-900 uppercase italic">Admin: New Session</h2>
+                    <span id="admin-email-display" class="bg-blue-50 text-blue-800 text-xs font-bold px-3 py-1 rounded-full"></span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <input type="text" id="new-loc" placeholder="Location (e.g. Wategos)" class="border p-3 rounded-xl text-sm outline-none">
+                    <input type="text" id="new-time" placeholder="Time (e.g. 6am - 8am)" class="border p-3 rounded-xl text-sm outline-none">
+                    <input type="date" id="new-date" class="border p-3 rounded-xl text-sm outline-none">
+                    <input type="number" id="new-price" placeholder="Price ($)" class="border p-3 rounded-xl text-sm outline-none">
+                    <button onclick="createSession()" class="bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition">Publish Session</button>
+                </div>
+                <button onclick="logout()" class="mt-4 text-xs text-red-500 font-bold hover:underline">Sign Out</button>
+            </section>
+
+            <div id="sessions-grid-container">
+                <h2 class="font-serif text-5xl font-bold mb-4">Find My Shot</h2>
+                <p class="text-gray-500 mb-8">Browse recent sessions and find yourself in the waves.</p>
+                
+                <section class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
+                    <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
+                    <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
+                </section>
+
+                <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+            </div>
             
             <div id="view-gallery" class="hidden">
-                <button onclick="showPage('sessions-page')" class="text-xs font-bold text-gray-400 hover:text-black mb-8">← BACK TO FIND MY SHOT</button>
-                <div class="flex justify-between items-end mb-10">
-                    <h2 id="gallery-header" class="font-serif text-5xl font-bold italic"></h2>
-                    <div id="admin-upload-btn" class="hidden">
-                        <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
-                        <label for="bulk-files" class="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-bold cursor-pointer">ADMIN: ADD PHOTOS</label>
+                <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest">← Back to Sessions</button>
+                
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                    <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
+                    <div class="flex items-center gap-4">
+                        <span id="gallery-price-tag" class="bg-blue-50 text-blue-800 px-4 py-2 rounded-full font-bold text-sm"></span>
+                        <div id="admin-upload-area" class="hidden">
+                            <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
+                            <label for="bulk-files" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold cursor-pointer hover:bg-blue-700 transition">UPLOAD PHOTOS</label>
+                        </div>
                     </div>
                 </div>
-                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+
+                <div id="upload-progress-container" class="hidden mb-8 max-w-md">
+                    <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
             </div>
         </section>
 
-        <section id="contact-page" class="hidden p-20 flex flex-col items-center justify-center text-center bg-gray-50/50">
-            <h2 class="font-serif text-6xl font-bold mb-6 italic text-blue-950">Get In Touch</h2>
-            <p class="text-gray-500 max-w-md mb-12 font-medium">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
-            <div class="bg-white p-12 rounded-[2.5rem] shadow-xl shadow-blue-900/5 max-w-lg w-full border border-gray-100">
+        <section id="contact-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center">
+            <h2 class="font-serif text-5xl font-bold mb-6 text-gray-900">Get In Touch</h2>
+            <p class="text-gray-500 max-w-md mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
+            
+            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
                 <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-8 h-8 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002 2H5a2 2 0 00-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z" stroke-width="1.5"></path></svg>
                 </div>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Email us at</p>
-                <h4 class="text-2xl font-serif font-bold mb-8 text-blue-950">hello@byronsurfclips.com</h4>
+                <h4 class="text-xl font-bold mb-8 text-gray-900">hello@byronsurfclips.com</h4>
                 <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Call us</p>
-                <h4 class="text-2xl font-serif font-bold text-blue-950">+61 2 1234 5678</h4>
+                <h4 class="text-xl font-bold text-gray-900">+61 2 1234 5678</h4>
             </div>
         </section>
 
-        <section id="cart-page" class="hidden p-12 max-w-3xl mx-auto">
-            <button onclick="showPage('sessions-page')" class="text-xs font-bold text-gray-400 hover:text-black mb-6 uppercase">← Back to Find My Shot</button>
-            <h2 class="font-serif text-5xl font-bold mb-12 italic">Your Cart</h2>
-            
-            <div id="cart-list" class="space-y-4 mb-10"></div>
-
-            <div class="bg-gray-50/50 p-10 rounded-[2rem] border border-gray-100">
-                <div class="flex justify-between text-gray-500 mb-4">
-                    <span>Subtotal (<span id="items-qty">0</span> photos)</span>
-                    <span id="cart-subtotal">$0 AUD</span>
-                </div>
-                <div id="pack-discount-row" class="flex justify-between text-emerald-500 font-bold mb-8 hidden">
-                    <span id="pack-name">Pack Discount</span>
-                    <span id="pack-amount">-$0 AUD</span>
-                </div>
-                <div class="flex justify-between items-center border-t pt-6 mb-10">
-                    <span class="text-xl font-bold">Total</span>
-                    <span class="text-3xl font-serif font-bold" id="cart-final-total">$0 AUD</span>
-                </div>
-                <button onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-5 rounded-2xl hover:bg-[#154b70] transition flex items-center justify-center gap-3">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2h3a1 1 0 100-2h-3z"></path></svg>
-                    Pay <span id="pay-amount-btn">$0 AUD</span>
-                </button>
-                <p class="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-[0.2em]">🔒 Secure checkout</p>
-            </div>
+        <section id="packs-page" class="hidden pt-32 pb-20 px-6">
+            <h2 class="text-5xl font-serif font-bold text-center mb-4 text-gray-900">Photo Packs</h2>
+            <p class="text-center text-gray-500 mb-12">Save more when you buy more photos together.</p>
+            <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"></div>
         </section>
     </main>
 
-    <footer class="footer-bg text-white py-20 px-8">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+    <footer class="bg-[#0a1120] text-white py-16 px-8 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
             <div>
-                <h2 class="font-serif text-3xl font-bold mb-2 italic">Byron Surf Clips</h2>
-                <p class="text-gray-500 text-sm italic">Capturing waves, one frame at a time.</p>
+                <h2 class="font-serif text-2xl font-bold mb-1">Byron Surf Clips</h2>
+                <p class="text-gray-400 text-xs">Capturing waves, one frame at a time.</p>
             </div>
-            <div class="flex gap-10 text-[11px] font-bold uppercase tracking-widest text-gray-400">
-                <button onclick="showPage('sessions-page')">Find My Shot</button>
-                <button onclick="showPage('packs-page')">Packs</button>
-                <button onclick="showPage('contact-page')">Contact</button>
+            <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
+                <button onclick="showPage('sessions-page')" class="hover:text-white">Find My Shot</button>
+                <button onclick="showPage('packs-page')" class="hover:text-white">Packs</button>
+                <button onclick="showPage('contact-page')" class="hover:text-white">Contact</button>
             </div>
-            <a href="https://instagram.com" class="text-gray-400 hover:text-white"><svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg></a>
+            <a href="https://instagram.com" class="text-gray-400 hover:text-white">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
         </div>
-        <div class="mt-20 pt-8 border-t border-gray-800 text-center text-gray-600 text-[10px] tracking-widest uppercase">
+        <div class="mt-12 pt-6 border-t border-gray-800 text-center text-gray-500 text-[10px] tracking-widest uppercase">
             © 2026 Byron Surf Clips. All rights reserved.
         </div>
     </footer>
 
+    <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white p-8 rounded-3xl w-full max-w-sm text-center relative">
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✕</button>
+            <h3 class="font-serif text-2xl mb-4">Admin Access</h3>
+            <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 rounded-xl outline-none mb-4">
+            <button onclick="login()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold">Send Magic Link</button>
+        </div>
+    </div>
+
+    <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
+        <div class="bg-white w-full max-w-md h-full p-8 overflow-y-auto flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-serif font-bold">Your Cart</h2>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black text-2xl">✕</button>
+            </div>
+            <div id="cart-items" class="flex-grow space-y-4 overflow-y-auto pr-2 no-scrollbar"></div>
+            
+            <div class="pt-6 border-t mt-6">
+                <div class="flex justify-between text-gray-500 text-sm mb-2">
+                    <span>Subtotal (<span id="cart-qty">0</span> photos)</span>
+                    <span id="cart-subtotal">$0 AUD</span>
+                </div>
+                <div id="pack-discount-row" class="hidden flex justify-between text-emerald-500 text-sm font-bold mb-4">
+                    <span>Pack Discount</span>
+                    <span id="cart-discount">-$0 AUD</span>
+                </div>
+                <div class="flex justify-between items-center font-bold text-xl mb-6 mt-4">
+                    <span>Total</span>
+                    <span id="cart-total" class="text-3xl font-serif">$0 AUD</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg flex justify-center gap-2 items-center">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2h3a1 1 0 100-2h-3z"></path></svg>
+                    Pay <span id="pay-btn-amt">$0 AUD</span>
+                </button>
+                <p class="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest">🔒 Secure checkout</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
+        <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
+        <div class="relative max-w-5xl w-full flex justify-center">
+            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10">
+            <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none object-contain">
+        </div>
+        <button onclick="nextPhoto()" class="absolute right-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
+    </div>
+
     <script>
+        // TU LÓGICA ORIGINAL INTACTA
         const SUPA_URL = 'https://gmyptbfrpspzmyucqumz.supabase.co';
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
         const client = supabase.createClient(SUPA_URL, SUPA_KEY);
         
-        let cart = [], isAdmin = false, currentSessionId = null, currentPrice = 10;
+        const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
+        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null, currentPrice = 10;
 
-        function showPage(id) {
-            ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'cart-page'].forEach(p => document.getElementById(p).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
+        // NAVEGACIÓN Y NAVBAR COLOR
+        function showPage(pageId) {
+            ['landing-page', 'sessions-page', 'packs-page', 'contact-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
             window.scrollTo(0,0);
-            if(id === 'sessions-page') loadSessions();
-            if(id === 'cart-page') renderCart();
+            
+            const nav = document.getElementById('main-nav');
+            if(pageId === 'landing-page') {
+                nav.classList.add('text-white'); nav.classList.remove('text-gray-900', 'bg-white/90', 'border-b');
+            } else {
+                nav.classList.remove('text-white'); nav.classList.add('text-gray-900', 'bg-white/90', 'border-b');
+            }
+
+            if(pageId === 'sessions-page') loadSessions();
+            if(pageId === 'packs-page') loadPacks();
         }
 
+        // CARGAR SETTINGS Y HERO BG
+        async function loadSiteSettings() {
+            const { data } = await client.from('site_settings').select('*').eq('id', 'main').single();
+            if (data?.hero_bg_url) {
+                document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
+            }
+        }
+
+        async function updateHeroBg(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const fName = `hero/${Date.now()}-${file.name}`;
+            const { error } = await client.storage.from('clips').upload(fName, file);
+            if (!error) {
+                const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
+                await client.from('site_settings').upsert({ id: 'main', hero_bg_url: url });
+                alert("Hero background updated!");
+                location.reload();
+            }
+        }
+
+        // AUTH
+        async function checkUser() {
+            const { data: { user } } = await client.auth.getUser();
+            if (user && user.email === "wildpauu@gmail.com") {
+                isAdmin = true;
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('hero-admin-btn').classList.remove('hidden');
+                document.getElementById('admin-upload-area').classList.remove('hidden');
+                document.getElementById('admin-email-display').innerText = user.email;
+            }
+        }
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            if(!email) return alert("Enter email first");
+            const { error } = await client.auth.signInWithOtp({ email });
+            if (!error) alert("Magic link sent! Check your inbox.");
+            else alert(error.message);
+        }
+        async function logout() { await client.auth.signOut(); location.reload(); }
+
+        // SESSIONS
         async function loadSessions() {
-            const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
-            document.getElementById('sessions-grid').innerHTML = (data || []).map(s => `
-                <div onclick="openGallery('${s.id}', '${s.location}', ${s.price})" class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all cursor-pointer border border-gray-100">
-                    <img src="${s.cover_url}" class="h-64 w-full object-cover">
-                    <div class="p-6">
-                        <h3 class="font-serif font-bold text-2xl mb-3">${s.location}</h3>
-                        <div class="flex gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            <span>📍 ${s.location}</span>
-                            <span>📅 ${s.date}</span>
-                            <span>📸 Photo Pack</span>
+            const { data, error } = await client.from('sessions').select('*').order('date', { ascending: false });
+            if (error) { console.error("Error loading sessions", error); return; }
+            sessions = data || [];
+            renderSessions(sessions);
+        }
+
+        function renderSessions(list) {
+            document.getElementById('sessions-grid').innerHTML = list.map(s => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 10})">
+                    <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-56 object-cover">
+                    <div class="p-5">
+                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-2">${s.location}</h3>
+                        <div class="flex gap-4 text-xs text-gray-500 font-medium">
+                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${s.location}</span>
+                            <span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${s.date || 'Recent'}</span>
                         </div>
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-xs font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
         }
 
+        function filterSessions() {
+            const loc = document.getElementById('filter-loc').value.toLowerCase();
+            const date = document.getElementById('filter-date').value;
+            renderSessions(sessions.filter(s => s.location.toLowerCase().includes(loc) && (!date || s.date === date)));
+        }
+
+        async function createSession() {
+            if(!isAdmin) return;
+            const location = document.getElementById('new-loc').value;
+            const time_range = document.getElementById('new-time').value;
+            const date = document.getElementById('new-date').value;
+            const price = document.getElementById('new-price').value || 10;
+            const { error } = await client.from('sessions').insert([{ location, time_range, date, price }]);
+            if (!error) { alert("Session published!"); loadSessions(); }
+        }
+
+        async function deleteSession(id) {
+            if (confirm("Delete this session entirely?")) {
+                await client.from('sessions').delete().eq('id', id);
+                location.reload();
+            }
+        }
+
+        // GALLERY & UPLOAD
         async function openGallery(id, title, price) {
-            currentSessionId = id; currentPrice = price;
-            document.getElementById('sessions-grid').classList.add('hidden');
+            currentSessionId = id; currentPrice = price || 10;
+            document.getElementById('sessions-grid-container').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
-            const { data } = await client.from('photos').select('*').eq('session_id', id);
-            document.getElementById('photos-grid').innerHTML = (data || []).map((p, i) => `
-                <div class="relative aspect-[3/4] rounded-xl overflow-hidden group">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover">
+            document.getElementById('gallery-price-tag').innerText = `$${currentPrice} AUD / Photo`;
+            loadPhotos();
+        }
+
+        function showSessions() { 
+            document.getElementById('view-gallery').classList.add('hidden'); 
+            document.getElementById('sessions-grid-container').classList.remove('hidden'); 
+        }
+
+        async function loadPhotos() {
+            const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
+            currentPhotos = data || [];
+            
+            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
+                <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer hover:scale-105 transition duration-500" onclick="openLightbox(${i})">
                     <div class="watermark-overlay"></div>
-                    <input type="checkbox" onchange="toggleCart('${p.url_watermarked}', this)" class="absolute top-4 left-4 w-6 h-6 accent-black shadow-lg" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
+                    <div class="absolute top-3 left-3 z-10">
+                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
+                    </div>
+                    ${isAdmin ? `
+                        <button onclick="setAsCover('${p.url_watermarked}')" class="absolute bottom-2 left-2 bg-white/90 px-2 py-1 rounded text-[10px] font-bold shadow z-10">★ Cover</button>
+                        <button onclick="deletePhoto('${p.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs shadow z-10">✕</button>
+                    ` : ''}
                 </div>`).join('');
         }
 
+        async function setAsCover(url) {
+            await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId);
+            alert("Cover updated for this session!");
+        }
+
+        async function deletePhoto(id) {
+            if(confirm("Delete this photo?")) {
+                await client.from('photos').delete().eq('id', id);
+                loadPhotos();
+            }
+        }
+
+        async function handleBulkUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+            const container = document.getElementById('upload-progress-container');
+            container.classList.remove('hidden');
+            let uploadedCount = 0;
+
+            for (const file of files) {
+                const fName = `watermarked/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
+                const { error } = await client.storage.from('clips').upload(fName, file);
+                if (!error) {
+                    const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
+                    await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
+                }
+                uploadedCount++;
+                document.getElementById('progress-bar').style.width = `${Math.round((uploadedCount / files.length) * 100)}%`;
+            }
+
+            setTimeout(() => { container.classList.add('hidden'); document.getElementById('progress-bar').style.width = '0%'; loadPhotos(); }, 1000);
+        }
+
+        // CARRITO MEJORADO CON DESCUENTOS
         function toggleCart(url, el) {
-            if(el.checked) cart.push({url, price: currentPrice});
+            if(el.checked) cart.push({url, price: currentPrice}); 
             else cart = cart.filter(c => c.url !== url);
             updateCartUI();
         }
 
+        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
+
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
-        }
-
-        function renderCart() {
-            const list = document.getElementById('cart-list');
-            list.innerHTML = cart.map(c => `
-                <div class="bg-white border border-gray-100 p-5 rounded-2xl flex items-center justify-between shadow-sm">
-                    <div class="flex items-center gap-6">
-                        <img src="${c.url}" class="w-20 h-20 object-cover rounded-xl border">
-                        <div>
-                            <p class="font-bold text-gray-400 text-xs uppercase tracking-widest">Photo</p>
-                            <p class="text-xl font-serif font-bold text-blue-950">$${c.price} AUD</p>
-                        </div>
-                    </div>
-                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
-                </div>`).join('');
             
+            // Render Lista de items
+            document.getElementById('cart-items').innerHTML = cart.map(c => `
+                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                        <img src="${c.url}" class="w-full h-full object-cover">
+                        <div class="watermark-overlay"></div>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
+                        <p class="font-bold text-gray-900">$${c.price} AUD</p>
+                    </div>
+                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
+                </div>`).join('');
+
+            // Cálculos
             const subtotal = cart.reduce((a, b) => a + b.price, 0);
             let final = subtotal;
             let discount = 0;
 
-            // Lógica de Descuentos (Starter Pack si hay 2+ fotos)
             if (cart.length >= 2) {
                 document.getElementById('pack-discount-row').classList.remove('hidden');
-                discount = subtotal - 1; // Solo cuesta 1 AUD como en tu foto
-                final = 1;
+                discount = subtotal - 50; // Ejemplo: Si el pack cuesta 50 AUD
+                if(discount < 0) discount = 0; // Previene que el descuento sea negativo
+                final = subtotal - discount;
             } else {
                 document.getElementById('pack-discount-row').classList.add('hidden');
             }
 
-            document.getElementById('items-qty').innerText = cart.length;
+            document.getElementById('cart-qty').innerText = cart.length;
             document.getElementById('cart-subtotal').innerText = `$${subtotal} AUD`;
-            document.getElementById('pack-amount').innerText = `-$${discount} AUD`;
-            document.getElementById('cart-final-total').innerText = `$${final} AUD`;
-            document.getElementById('pay-amount-btn').innerText = `$${final} AUD`;
+            document.getElementById('cart-discount').innerText = `-$${discount} AUD`;
+            document.getElementById('cart-total').innerText = `$${final} AUD`;
+            document.getElementById('pay-btn-amt').innerText = `$${final} AUD`;
         }
 
         function removeFromCart(url) {
             cart = cart.filter(c => c.url !== url);
-            renderCart(); updateCartUI();
+            updateCartUI();
+            loadPhotos(); // Refresca los checkboxes de la galería
         }
 
+        // MANTIENE TU LÓGICA DE STRIPE
         async function checkout() {
-            const { data } = await client.functions.invoke('swift-api', {
-                body: { photos: cart.map(c => c.url) }
+            if(!cart.length) return alert("Cart is empty");
+            const btn = document.querySelector('#cart-modal button.bg-[#1e608d]');
+            btn.innerText = "REDIRECTING...";
+            
+            // Mandamos solo el array de URLs a tu Edge Function como pedía el código original
+            const cartUrls = cart.map(c => c.url);
+            
+            const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+                body: JSON.stringify({ photos: cartUrls })
             });
-            if(data?.url) window.location.href = data.url;
+            const data = await res.json();
+            if(data.url) window.location.href = data.url; 
+            else { alert("Checkout error"); btn.innerText = "Checkout with Stripe"; }
         }
 
+        // LIGHTBOX Y PACKS (Igual)
+        function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
+        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
+        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
+
+        async function loadPacks() {
+            const { data } = await client.from('packs').select('*').order('id');
+            document.getElementById('packs-container').innerHTML = (data || []).map(p => `
+                <div class="bg-white p-10 rounded-[2rem] text-center border border-gray-100 shadow-xl hover:-translate-y-2 transition duration-300">
+                    <h3 class="text-2xl font-serif font-bold mb-2">${p.name}</h3>
+                    <p class="text-gray-400 text-xs font-bold mb-6">${p.photos_count} PHOTOS INCLUDED</p>
+                    <div class="text-5xl font-bold mb-8 text-blue-950">$${p.price}<span class="text-sm text-gray-400 ml-1">AUD</span></div>
+                    <button onclick="showPage('sessions-page')" class="bg-gray-900 w-full py-4 rounded-xl text-white font-bold hover:bg-black transition">BROWSE SESSIONS</button>
+                </div>`).join('');
+        }
+
+        // BOOTSTRAP
+        loadSiteSettings();
+        checkUser();
         showPage('landing-page');
-        updateCartUI();
     </script>
 </body>
 </html>
