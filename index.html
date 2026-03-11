@@ -9,116 +9,106 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&display=swap" rel="stylesheet">
     <style>
         .font-serif { font-family: 'Playfair Display', serif; }
-        .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease-in-out; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .hero-bg { 
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); 
+            background-size: cover; background-position: center; 
+        }
+        .watermark-overlay {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png');
+            background-size: contain; background-repeat: no-repeat; background-position: center;
+            opacity: 0.3; pointer-events: none;
+        }
     </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex flex-col relative font-sans text-gray-800">
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
 
     <section id="landing-page" class="hero-bg h-screen flex flex-col items-center justify-center text-center p-6 text-white relative">
         <nav class="absolute top-0 w-full p-8 flex justify-between items-center max-w-[1400px]">
             <h1 class="font-serif font-bold text-2xl tracking-wide">Byron Surf Clips</h1>
-            <div class="hidden md:flex items-center gap-8 font-semibold text-[13px] tracking-widest uppercase">
-                <button onclick="goToSessions()" class="hover:text-gray-300 transition">Find My Shot</button>
-                <button onclick="showPacks()" class="hover:text-gray-300 transition">Packs</button>
-                <button class="hover:text-gray-300 transition">Contact</button>
-                <div class="flex gap-4 items-center ml-4">
-                    <button onclick="document.getElementById('auth-modal').classList.toggle('hidden')"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
-                    <button onclick="toggleCartModal()" class="relative"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg><span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span></button>
-                </div>
+            <div class="flex items-center gap-6 font-semibold text-[12px] tracking-widest uppercase">
+                <button onclick="goToSessions()" class="hover:text-gray-300">Find My Shot</button>
+                <button onclick="document.getElementById('auth-modal').classList.toggle('hidden')"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+                <button onclick="toggleCartModal()" class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">0</span>
+                </button>
             </div>
         </nav>
 
-        <div id="hero-admin-btn" class="hidden absolute top-24 right-8 bg-black/50 p-2 rounded-xl backdrop-blur-md border border-white/20">
-            <label class="cursor-pointer text-xs font-bold text-white flex items-center gap-2">
-                ⚙️ Change Background
-                <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)">
-            </label>
+        <div id="hero-admin-btn" class="hidden absolute top-24 right-8 bg-black/40 p-2 rounded-lg backdrop-blur-md">
+            <label class="cursor-pointer text-[10px] font-bold text-white uppercase tracking-tighter"> Change BG <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)"></label>
         </div>
 
-        <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4 tracking-wide mt-10">Byron Surf Clips</h1>
-        <p class="text-lg md:text-xl mb-12 max-w-2xl font-light tracking-wide opacity-90">Capturing the essence of Byron Bay's waves</p>
-        <button onclick="goToSessions()" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300">Find My Shot</button>
-        
-        <div class="absolute bottom-10 animate-bounce">
-            <svg class="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
-        </div>
+        <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4">Byron Surf Clips</h1>
+        <p class="text-lg md:text-xl mb-12 font-light tracking-widest opacity-80 uppercase">Capturing the essence of Byron Bay's waves</p>
+        <button onclick="goToSessions()" class="bg-white/10 backdrop-blur-md border border-white/40 px-12 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-white hover:text-black transition-all">Find My Shot</button>
     </section>
 
-    <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
-        <div class="bg-white p-8 rounded-3xl w-full max-w-sm text-center relative">
-            <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400">✕</button>
-            <h3 class="font-serif text-2xl mb-4">Admin Access</h3>
-            <div id="auth-ui" class="space-y-4">
-                <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 rounded-xl outline-none focus:ring-2 focus:ring-gray-900">
-                <button onclick="login()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold">Send Magic Link</button>
-            </div>
-        </div>
-    </div>
-
-    <section id="sessions-page" class="hidden flex-grow pt-10 px-4">
-        <main class="max-w-6xl mx-auto pb-20">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="font-serif text-4xl font-bold">Latest Sessions</h2>
-                <button onclick="backToHome()" class="text-sm font-bold uppercase tracking-widest text-gray-400 hover:text-black">← Home</button>
-            </div>
-
-            <section id="admin-panel" class="hidden bg-white p-8 rounded-[2rem] shadow-sm mb-12 border border-gray-100">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="font-black text-lg text-gray-900 uppercase">Create New Session</h2>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <input type="text" id="new-loc" placeholder="Location" class="border p-3 rounded-xl text-sm">
-                    <input type="date" id="new-date" class="border p-3 rounded-xl text-sm">
-                    <input type="number" id="new-price" placeholder="Price per photo ($)" class="border p-3 rounded-xl text-sm">
-                    
-                    <div class="border p-2 rounded-xl text-sm flex items-center justify-center bg-gray-50">
-                        <label class="cursor-pointer text-xs font-bold text-gray-500 w-full text-center">
-                            📁 Upload Cover
-                            <input type="file" id="new-cover" class="hidden" accept="image/*">
-                        </label>
-                    </div>
-
-                    <button onclick="createSession()" class="bg-gray-900 text-white font-bold py-3 rounded-xl hover:bg-gray-800 transition">Publish</button>
-                </div>
-            </section>
-
-            <div id="sessions-grid-container">
-                <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-            </div>
+    <section id="sessions-page" class="hidden pt-12 px-6">
+        <div class="max-w-7xl mx-auto">
             
-            <div id="view-gallery" class="hidden">
-                <div class="flex items-center gap-4 mb-8">
-                    <button onclick="showSessions()" class="bg-white p-3 rounded-2xl shadow-sm hover:shadow-md transition text-gray-600 font-bold border border-gray-100">←</button>
-                    <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
-                    <span id="gallery-price" class="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase ml-4"></span>
+            <div id="sessions-header" class="mb-12">
+                <div class="flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
+                    <div>
+                        <button onclick="backToHome()" class="text-[10px] font-black uppercase tracking-widest text-gray-400 hover:text-black mb-2">← Back Home</button>
+                        <h2 class="font-serif text-5xl font-bold">The Sessions</h2>
+                    </div>
+                    <div class="flex flex-wrap gap-3 bg-white p-2 rounded-2xl shadow-sm border border-gray-100">
+                        <input type="text" id="search-loc" placeholder="Search Location..." class="text-xs p-3 outline-none w-40" oninput="filterSessions()">
+                        <input type="date" id="search-date" class="text-xs p-3 outline-none border-l" onchange="filterSessions()">
+                        <button onclick="resetFilters()" class="text-[10px] font-bold px-4 text-gray-400 hover:text-red-500">Reset</button>
+                    </div>
                 </div>
-                
-                <div id="admin-upload-area" class="hidden bg-gray-50 p-10 rounded-[2.5rem] mb-12 text-center border-2 border-dashed border-gray-200">
-                    <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
-                    <label for="bulk-files" class="bg-gray-900 text-white px-10 py-4 rounded-full font-bold cursor-pointer hover:bg-gray-700 transition inline-block">UPLOAD NEW PHOTOS</label>
-                    
-                    <div id="upload-progress-container" class="hidden mt-8 max-w-md mx-auto">
-                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                            <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
+
+                <div id="admin-panel" class="hidden bg-gray-900 p-8 rounded-[2.5rem] text-white mb-12">
+                    <h3 class="font-bold text-xs uppercase tracking-widest mb-6 text-gray-400">Admin: New Session</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <input type="text" id="new-loc" placeholder="Location (e.g. Pass)" class="bg-white/10 border-white/20 p-4 rounded-2xl text-sm outline-none">
+                        <input type="date" id="new-date" class="bg-white/10 border-white/20 p-4 rounded-2xl text-sm outline-none">
+                        <input type="number" id="new-price" placeholder="Price ($)" class="bg-white/10 border-white/20 p-4 rounded-2xl text-sm outline-none">
+                        <label class="bg-white/5 border border-dashed border-white/30 p-4 rounded-2xl text-xs flex items-center justify-center cursor-pointer">
+                            📁 Cover Image <input type="file" id="new-cover" class="hidden">
+                        </label>
+                        <button onclick="createSession()" class="bg-white text-black font-black rounded-2xl hover:bg-gray-200 transition">Publish</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 pb-20"></div>
+
+            <div id="view-gallery" class="hidden pb-20">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
+                    <div class="flex items-center gap-6">
+                        <button onclick="showSessions()" class="bg-white w-12 h-12 rounded-full shadow-sm flex items-center justify-center hover:bg-black hover:text-white transition">←</button>
+                        <h2 id="gallery-header" class="font-serif text-4xl font-bold"></h2>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div id="gallery-price-tag" class="bg-gray-900 text-white px-6 py-2 rounded-full text-sm font-bold tracking-tighter"></div>
+                        <div id="admin-upload-btn" class="hidden">
+                            <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
+                            <label for="bulk-files" class="bg-blue-600 text-white px-6 py-2 rounded-full text-sm font-bold cursor-pointer hover:bg-blue-700">Add Photos</label>
                         </div>
                     </div>
                 </div>
-                
-                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                <div id="photos-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4"></div>
             </div>
-        </main>
+        </div>
     </section>
 
     <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-        <div class="bg-white w-full max-w-md h-full p-8 overflow-y-auto flex flex-col shadow-2xl">
+        <div class="bg-white w-full max-w-md h-full p-8 shadow-2xl flex flex-col">
             <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-serif font-bold">Your Cart</h2>
-                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black text-2xl">✕</button>
+                <h2 class="font-serif text-3xl font-bold">Cart</h2>
+                <button onclick="toggleCartModal()" class="text-2xl text-gray-400">✕</button>
             </div>
-            <div id="cart-items" class="grid grid-cols-2 gap-4 flex-grow content-start overflow-y-auto pr-2 no-scrollbar"></div>
+            <div id="cart-items" class="flex-grow grid grid-cols-2 gap-4 content-start overflow-y-auto pr-2"></div>
             <div class="pt-6 border-t mt-6">
-                <button onclick="checkout()" class="w-full bg-gray-900 text-white font-black py-5 rounded-2xl hover:bg-black transition uppercase tracking-widest">Checkout</button>
+                <div class="flex justify-between font-bold text-xl mb-6 px-2">
+                    <span>Total</span>
+                    <span id="cart-total">$0</span>
+                </div>
+                <button onclick="checkout()" class="w-full bg-gray-900 text-white font-black py-5 rounded-2xl tracking-widest uppercase hover:bg-black transition">Checkout with Stripe</button>
             </div>
         </div>
     </div>
@@ -128,8 +118,7 @@
         const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdteXB0YmZycHNwem15dWNxdW16Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5NTg5NDIsImV4cCI6MjA4ODUzNDk0Mn0.1GvxHkh1Uzkh0GWlllG1KYds2jXGTtHjUUkR6XUTmqU'; 
         const client = supabase.createClient(SUPA_URL, SUPA_KEY);
         
-        const wmUrl = "https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png";
-        let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null;
+        let allSessions = [], cart = [], isAdmin = false, currentSessionId = null, currentPrice = 0;
 
         async function init() {
             await loadSiteSettings();
@@ -137,177 +126,131 @@
             await loadSessions();
         }
 
-        // CARGAR Y ACTUALIZAR FONDO DEL HERO
         async function loadSiteSettings() {
             const { data } = await client.from('site_settings').select('*').eq('id', 'main').single();
-            if (data && data.hero_bg_url) {
-                document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
-            }
+            if (data?.hero_bg_url) document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
         }
 
-        async function updateHeroBg(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const fName = `hero/${Date.now()}-${file.name}`;
-            const { data, error } = await client.storage.from('clips').upload(fName, file);
-            if (!error) {
-                const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
-                await client.from('site_settings').upsert({ id: 'main', hero_bg_url: url });
-                alert("Background updated!");
-                location.reload();
-            }
-        }
-
-        // AUTH
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
-            if (user) {
-                if (user.email === "wildpauu@gmail.com") {
-                    isAdmin = true;
-                    document.getElementById('admin-panel').classList.remove('hidden');
-                    document.getElementById('hero-admin-btn').classList.remove('hidden');
-                }
-                document.getElementById('auth-ui').innerHTML = `
-                    <p class="text-sm font-bold text-gray-600 mb-4">${user.email}</p>
-                    <button onclick="logout()" class="w-full bg-red-50 text-red-500 py-3 rounded-xl font-bold hover:bg-red-500 hover:text-white transition">Sign Out</button>
-                `;
+            if (user?.email === "wildpauu@gmail.com") {
+                isAdmin = true;
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('hero-admin-btn').classList.remove('hidden');
+                document.getElementById('admin-upload-btn')?.classList.remove('hidden');
             }
         }
-        async function login() {
-            const email = document.getElementById('login-email').value;
-            const { error } = await client.auth.signInWithOtp({ email });
-            if (!error) alert("Magic link sent! Check your inbox.");
-        }
-        async function logout() { await client.auth.signOut(); location.reload(); }
 
-        // NAVIGATION
-        function hideAll() { ['landing-page', 'sessions-page'].forEach(id => document.getElementById(id).classList.add('hidden')); }
-        function goToSessions() { hideAll(); document.getElementById('sessions-page').classList.remove('hidden'); showSessions(); }
-        function backToHome() { hideAll(); document.getElementById('landing-page').classList.remove('hidden'); }
-        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
-
-        // SESSIONS
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
-            sessions = data || [];
-            
-            document.getElementById('sessions-grid').innerHTML = sessions.map(s => `
-                <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                    <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-64 object-cover" onclick="openGallery('${s.id}', '${s.location}', '${s.price}')">
-                    <div class="p-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <h3 class="font-serif font-bold text-2xl text-gray-900" onclick="openGallery('${s.id}', '${s.location}', '${s.price}')">${s.location}</h3>
-                            <span class="font-bold text-sm bg-gray-100 px-3 py-1 rounded-full">$${s.price || 10}</span>
+            allSessions = data || [];
+            renderSessions(allSessions);
+        }
+
+        function renderSessions(data) {
+            document.getElementById('sessions-grid').innerHTML = data.map(s => `
+                <div onclick="openGallery('${s.id}', '${s.location}', ${s.price})" class="group bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 cursor-pointer">
+                    <div class="h-80 overflow-hidden relative">
+                        <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                        <div class="absolute bottom-6 left-8 text-white">
+                            <h3 class="font-serif text-3xl font-bold">${s.location}</h3>
+                            <p class="text-[10px] font-bold tracking-[0.2em] uppercase opacity-70">${s.date}</p>
                         </div>
-                        <span class="text-gray-400 text-xs font-bold uppercase tracking-widest">${s.date || ''}</span>
-                        ${isAdmin ? `<button onclick="deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-xl text-[10px] font-bold">DELETE SESSION</button>` : ''}
                     </div>
                 </div>`).join('');
         }
 
-        async function createSession() {
-            if(!isAdmin) return;
-            const location = document.getElementById('new-loc').value;
-            const date = document.getElementById('new-date').value;
-            const price = document.getElementById('new-price').value || 10;
-            const coverFile = document.getElementById('new-cover').files[0];
-
-            let cover_url = null;
-            if (coverFile) {
-                const fName = `covers/${Date.now()}-${coverFile.name.replace(/\s+/g, '_')}`;
-                const { data, error } = await client.storage.from('clips').upload(fName, coverFile);
-                if (!error) cover_url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
-            }
-
-            const { error } = await client.from('sessions').insert([{ location, date, price, cover_url }]);
-            if (!error) { alert("Session published!"); loadSessions(); }
+        // FILTROS
+        function filterSessions() {
+            const loc = document.getElementById('search-loc').value.toLowerCase();
+            const date = document.getElementById('search-date').value;
+            const filtered = allSessions.filter(s => {
+                const matchLoc = s.location.toLowerCase().includes(loc);
+                const matchDate = date ? s.date === date : true;
+                return matchLoc && matchDate;
+            });
+            renderSessions(filtered);
         }
 
-        async function deleteSession(id) {
-            if (confirm("Delete session?")) {
-                await client.from('sessions').delete().eq('id', id);
-                location.reload();
-            }
+        function resetFilters() {
+            document.getElementById('search-loc').value = '';
+            document.getElementById('search-date').value = '';
+            renderSessions(allSessions);
         }
 
-        // GALLERY & UPLOAD
+        // GALLERY
         async function openGallery(id, title, price) {
             currentSessionId = id;
-            document.getElementById('sessions-grid-container').classList.add('hidden');
+            currentPrice = price || 10;
+            document.getElementById('sessions-grid').classList.add('hidden');
+            document.getElementById('sessions-header').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
-            document.getElementById('gallery-header').innerText = title;
-            document.getElementById('gallery-price').innerText = `$${price || 10} / Photo`;
             
-            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
+            document.getElementById('gallery-header').innerText = title;
+            document.getElementById('gallery-price-tag').innerText = `$${currentPrice} PER PHOTO`;
+            
             loadPhotos();
         }
 
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
-            currentPhotos = data || [];
-            
-            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
-                <div class="relative group rounded-2xl overflow-hidden aspect-square border shadow-sm">
+            document.getElementById('photos-grid').innerHTML = (data || []).map(p => `
+                <div class="relative aspect-[3/4] rounded-2xl overflow-hidden shadow-sm border border-gray-100 group">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover">
-                    <img src="${wmUrl}" class="absolute inset-0 w-full h-full opacity-30 pointer-events-none">
-                    <div class="absolute top-3 left-3 bg-white/90 p-1 rounded-lg shadow-sm z-10">
-                        <input type="checkbox" class="w-6 h-6 cursor-pointer accent-gray-900" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.includes(p.url_watermarked) ? 'checked' : ''}>
+                    <div class="watermark-overlay"></div>
+                    <div class="absolute top-4 left-4 z-20">
+                        <input type="checkbox" onchange="toggleCart('${p.url_watermarked}', this)" class="w-6 h-6 accent-black cursor-pointer shadow-xl" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
                     </div>
-                    ${isAdmin ? `
-                        <button onclick="setAsCover('${p.url_watermarked}')" class="absolute bottom-3 left-3 bg-white/90 text-black px-2 py-1 rounded text-[10px] font-bold shadow z-10 hover:bg-black hover:text-white transition">★ Set Cover</button>
-                        <button onclick="deletePhoto('${p.id}')" class="absolute top-3 right-3 bg-red-500 text-white w-7 h-7 rounded-full text-xs font-bold shadow-lg z-10">✕</button>
-                    ` : ''}
+                    ${isAdmin ? `<button onclick="setCover('${p.url_watermarked}')" class="absolute bottom-4 left-4 bg-white/90 text-[10px] font-black px-3 py-1 rounded-full shadow-lg z-20">SET COVER</button>` : ''}
                 </div>`).join('');
         }
 
-        async function setAsCover(url) {
-            if(!confirm("Set this photo as the session cover?")) return;
-            await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId);
-            alert("Cover updated!");
-            loadSessions();
-        }
-
-        async function deletePhoto(id) {
-            if(confirm("Delete this photo?")) {
-                await client.from('photos').delete().eq('id', id);
-                loadPhotos();
-            }
-        }
-
-        async function handleBulkUpload(event) {
-            const files = event.target.files;
-            if (!files.length) return;
-
-            const container = document.getElementById('upload-progress-container');
-            container.classList.remove('hidden');
-
-            let uploadedCount = 0;
-            for (const file of files) {
-                const fName = `watermarked/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-                const { error } = await client.storage.from('clips').upload(fName, file);
-                if (!error) {
-                    const url = `${SUPA_URL}/storage/v1/object/public/clips/${fName}`;
-                    await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
-                }
-                uploadedCount++;
-                document.getElementById('progress-bar').style.width = `${Math.round((uploadedCount / files.length) * 100)}%`;
-            }
-
-            setTimeout(() => { container.classList.add('hidden'); document.getElementById('progress-bar').style.width = '0%'; loadPhotos(); }, 1000);
-        }
-
-        // CART & CHECKOUT
         function toggleCart(url, el) {
-            if(el.checked) cart.push(url); else cart = cart.filter(i => i !== url);
+            if(el.checked) cart.push({url, price: currentPrice});
+            else cart = cart.filter(c => c.url !== url);
+            updateCartUI();
+        }
+
+        function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
-            renderCart();
+            const total = cart.reduce((acc, curr) => acc + curr.price, 0);
+            document.getElementById('cart-total').innerText = `$${total}`;
+            
+            document.getElementById('cart-items').innerHTML = cart.map(c => `
+                <div class="relative aspect-square rounded-xl overflow-hidden border">
+                    <img src="${c.url}" class="w-full h-full object-cover">
+                    <div class="watermark-overlay" style="opacity: 0.2"></div>
+                </div>`).join('');
         }
+
+        async function setCover(url) {
+            await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId);
+            alert("Cover Updated!");
+        }
+
+        function showSessions() {
+            document.getElementById('view-gallery').classList.add('hidden');
+            document.getElementById('sessions-grid').classList.remove('hidden');
+            document.getElementById('sessions-header').classList.remove('hidden');
+        }
+
+        function goToSessions() {
+            document.getElementById('landing-page').classList.add('hidden');
+            document.getElementById('sessions-page').classList.remove('hidden');
+        }
+
+        function backToHome() {
+            document.getElementById('sessions-page').classList.add('hidden');
+            document.getElementById('landing-page').classList.remove('hidden');
+        }
+
         function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
-        function renderCart() {
-            document.getElementById('cart-items').innerHTML = cart.map(url => `
-                <div class="relative rounded-xl overflow-hidden aspect-square border shadow-sm"><img src="${url}" class="w-full h-full object-cover"></div>`).join('');
+
+        async function checkout() {
+            alert("Redirecting to Stripe Checkout for " + cart.length + " photos...");
+            // Aquí integrarías tu función de Cloud Function o Edge Function para Stripe
         }
-        async function checkout() { alert("Stripe checkout goes here!"); }
 
         init();
     </script>
