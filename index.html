@@ -159,7 +159,7 @@
                     <span id="cart-subtotal">$0 AUD</span>
                 </div>
                 <div id="pack-discount-row" class="hidden flex justify-between text-emerald-500 text-sm font-bold mb-4">
-                    <span>Pack Discount (Starter Pack)</span>
+                    <span>Pack Discount</span>
                     <span id="cart-discount">-$0 AUD</span>
                 </div>
                 <div class="flex justify-between items-center font-bold text-xl mb-6 mt-4">
@@ -192,7 +192,6 @@
         
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0, isAdmin = false, currentSessionId = null, currentPrice = 10;
 
-        // NAVEGACIÓN Y NAVBAR COLOR
         function showPage(pageId) {
             ['landing-page', 'sessions-page', 'packs-page', 'contact-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
             document.getElementById(pageId).classList.remove('hidden');
@@ -226,7 +225,6 @@
             }
         }
 
-        // AUTH
         async function checkUser() {
             const { data: { user } } = await client.auth.getUser();
             if (user && user.email === "wildpauu@gmail.com") {
@@ -245,7 +243,6 @@
         }
         async function logout() { await client.auth.signOut(); location.reload(); }
 
-        // SESSIONS
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
             sessions = data || [];
@@ -257,11 +254,14 @@
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 10})">
                     <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-56 object-cover">
                     <div class="p-5">
-                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-2">${s.location}</h3>
-                        <div class="flex gap-4 text-[11px] text-gray-500 font-bold uppercase tracking-widest">
-                            <span>📍 ${s.location}</span>
-                            <span>📅 ${s.date || 'Recent'}</span>
+                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-3">${s.location}</h3>
+                        
+                        <div class="flex flex-wrap gap-2 text-[10px] text-gray-500 font-bold uppercase tracking-widest">
+                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">📍 ${s.location}</span>
+                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">📅 ${s.date || 'Recent'}</span>
+                            <span class="bg-gray-50 border border-gray-100 px-2 py-1 rounded">⏰ ${s.time_range || 'All Day'}</span>
                         </div>
+
                         ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
@@ -290,7 +290,6 @@
             }
         }
 
-        // GALLERY & UPLOAD
         async function openGallery(id, title, price) {
             currentSessionId = id; currentPrice = price || 10;
             document.getElementById('sessions-grid-container').classList.add('hidden');
@@ -355,7 +354,7 @@
             setTimeout(() => { container.classList.add('hidden'); document.getElementById('progress-bar').style.width = '0%'; loadPhotos(); }, 1000);
         }
 
-        // --- CARRITO Y CÁLCULO DE DESCUENTOS EXACTO ---
+        // --- CARRITO ---
         function toggleCart(url, el) {
             if(el.checked) cart.push({url, price: currentPrice}); 
             else cart = cart.filter(c => c.url !== url);
@@ -381,17 +380,15 @@
                 </div>`).join('');
 
             const subtotal = cart.reduce((a, b) => a + b.price, 0);
-            let final = subtotal;
+            let finalAmount = subtotal;
             let discount = 0;
 
-            // Lógica exacta de tu foto: Si el cliente elige 2 o más fotos, el Total baja a 1 AUD (para pruebas)
-            // Cuando quieras cobrar de verdad, cambia el TEST_PRICE_CAP al precio de tu pack real (ej: 50)
             const TEST_PRICE_CAP = 1; 
 
             if (cart.length >= 2 && subtotal > TEST_PRICE_CAP) {
                 document.getElementById('pack-discount-row').classList.remove('hidden');
                 discount = subtotal - TEST_PRICE_CAP; 
-                final = TEST_PRICE_CAP;
+                finalAmount = TEST_PRICE_CAP;
             } else {
                 document.getElementById('pack-discount-row').classList.add('hidden');
             }
@@ -399,32 +396,39 @@
             document.getElementById('cart-qty').innerText = cart.length;
             document.getElementById('cart-subtotal').innerText = `$${subtotal} AUD`;
             document.getElementById('cart-discount').innerText = `-$${discount} AUD`;
-            document.getElementById('cart-total').innerText = `$${final} AUD`;
-            document.getElementById('pay-btn-amt').innerText = `$${final} AUD`;
+            document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
+            document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
+            
+            // Guardamos el precio final en una variable global para mandarla a Stripe
+            window.currentFinalPrice = finalAmount;
         }
 
         function removeFromCart(url) {
             cart = cart.filter(c => c.url !== url);
             updateCartUI();
-            loadPhotos(); // Refresca los checkboxes visualmente
+            loadPhotos();
         }
 
-        // --- CHECKOUT STRIPE CON MANEJO DE ERRORES ---
+        // --- CHECKOUT ACTUALIZADO ---
         async function checkout() {
             if(!cart.length) return alert("Your cart is empty.");
+            
             const btn = document.getElementById('checkout-btn');
             const originalText = btn.innerHTML;
-            btn.innerHTML = "REDIRECTING TO SECURE PAYMENT...";
+            btn.innerHTML = "REDIRECTING...";
             btn.disabled = true;
             
             try {
-                // Tu Edge Function esperaba un array simple de URLs
                 const cartUrls = cart.map(c => c.url);
                 
+                // AQUÍ ESTÁ LA CLAVE: Enviamos "amount" a tu Edge Function
                 const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
-                    body: JSON.stringify({ photos: cartUrls })
+                    body: JSON.stringify({ 
+                        photos: cartUrls,
+                        amount: window.currentFinalPrice // Esto le dice a tu servidor que cobre $1
+                    })
                 });
 
                 if (!res.ok) {
@@ -441,21 +445,20 @@
                 }
 
             } catch (error) {
-                alert("Checkout Error: " + error.message + "\n\nPor favor, revisa los logs de tu Edge Function en Supabase.");
-                console.error("Detalle del error:", error);
+                alert("Checkout Error: " + error.message + "\n\nTienes que actualizar tu Edge Function para que lea el 'amount' que le estamos enviando.");
+                console.error(error);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }
         }
 
-        // LIGHTBOX
+        // LIGHTBOX Y PACKS
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
         function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
         function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
 
-        // PACKS
         async function loadPacks() {
             const { data } = await client.from('packs').select('*').order('id');
             document.getElementById('packs-container').innerHTML = (data || []).map(p => `
