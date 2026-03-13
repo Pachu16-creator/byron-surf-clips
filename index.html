@@ -12,7 +12,6 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        /* Marca de agua global para protección */
         .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
     </style>
 </head>
@@ -118,17 +117,37 @@
             </div>
         </section>
 
-        <section id="contact-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center">
-            <h2 class="font-serif text-5xl font-bold mb-6 text-gray-900">Get In Touch</h2>
-            <p class="text-gray-500 max-w-md mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
-            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
-                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <svg class="w-8 h-8 text-blue-900" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002 2H5a2 2 0 00-2-2V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2z" stroke-width="1.5"></path></svg>
+        <section id="contact-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center px-6 max-w-3xl mx-auto">
+            <h2 class="font-serif text-5xl font-bold mb-6 text-gray-900 text-center">Get In Touch</h2>
+            <p class="text-gray-500 text-center mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
+            
+            <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl w-full border border-gray-100 relative">
+                <div id="contact-success" class="hidden absolute inset-0 bg-white rounded-[2rem] flex-col items-center justify-center text-center p-8 z-10">
+                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                    <h3 class="font-serif text-3xl font-bold mb-2">Message Sent!</h3>
+                    <p class="text-gray-500">Thanks for reaching out. We'll get back to you as soon as possible.</p>
+                    <button onclick="resetContactForm()" class="mt-8 text-sm font-bold text-gray-400 hover:text-black uppercase tracking-widest transition">Send another message</button>
                 </div>
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Email us at</p>
-                <h4 class="text-xl font-bold mb-8 text-gray-900">hello@byronsurfclips.com</h4>
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">Call us</p>
-                <h4 class="text-xl font-bold text-gray-900">+61 2 1234 5678</h4>
+
+                <form id="contact-form" onsubmit="submitContactForm(event)" class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Name</label>
+                        <input type="text" id="contact-name" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Email</label>
+                        <input type="email" id="contact-email" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Message</label>
+                        <textarea id="contact-message" rows="4" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 resize-none transition"></textarea>
+                    </div>
+                    <button type="submit" id="contact-submit-btn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg flex justify-center items-center gap-2">
+                        Send Message
+                    </button>
+                </form>
             </div>
         </section>
 
@@ -231,16 +250,14 @@
             if(pageId === 'packs-page') loadPacks();
         }
 
-        // --- SISTEMA DE LECTURA DE URL PARA STRIPE ---
         function checkUrlStatus() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
             
             if (status === 'success') {
                 showPage('success-page');
-                cart = []; // Vaciamos el carrito tras pagar
+                cart = []; 
                 updateCartUI();
-                // Limpiamos la URL para que no recargue siempre en success
                 window.history.replaceState({}, document.title, window.location.pathname);
             } else if (status === 'cancel') {
                 showPage('cancel-page');
@@ -289,7 +306,6 @@
             
             const { error } = await client.auth.signInWithOtp({ 
                 email, 
-                // ESTO USA EL NUEVO DOMINIO DINÁMICAMENTE
                 options: { emailRedirectTo: window.location.origin } 
             });
             
@@ -551,6 +567,42 @@
                     <div class="text-5xl font-bold mb-8 text-blue-950">$${p.price}<span class="text-sm text-gray-400 ml-1">AUD</span></div>
                     <button onclick="showPage('sessions-page')" class="bg-gray-900 w-full py-4 rounded-xl text-white font-bold hover:bg-black transition">BROWSE SESSIONS</button>
                 </div>`).join('');
+        }
+
+        // --- NUEVAS FUNCIONES DEL FORMULARIO DE CONTACTO ---
+        async function submitContactForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById('contact-submit-btn');
+            const name = document.getElementById('contact-name').value;
+            const email = document.getElementById('contact-email').value;
+            const message = document.getElementById('contact-message').value;
+
+            btn.innerText = "Sending...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${SUPA_URL}/functions/v1/contact-form`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                if (res.ok) {
+                    document.getElementById('contact-success').classList.replace('hidden', 'flex');
+                } else {
+                    throw new Error("Error sending message");
+                }
+            } catch (error) {
+                alert("Oops! Something went wrong. Please try again.");
+            } finally {
+                btn.innerText = "Send Message";
+                btn.disabled = false;
+            }
+        }
+
+        function resetContactForm() {
+            document.getElementById('contact-form').reset();
+            document.getElementById('contact-success').classList.replace('flex', 'hidden');
         }
 
         // --- INICIALIZACIÓN ---
