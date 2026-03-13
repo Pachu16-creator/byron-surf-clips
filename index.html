@@ -4,6 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Byron Surf Clips | Capture the Wave</title>
+
+    <meta name="description" content="Find yourself in the waves. High-resolution surf photography from Byron Bay, Australia.">
+    <meta property="og:title" content="Byron Surf Clips | Capture the Wave">
+    <meta property="og:description" content="Get your high-quality surf photos from Byron Bay. Capture your best waves!">
+    <meta property="og:image" content="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg"> 
+    <meta property="og:url" content="https://byronsurfclips.com">
+    <meta property="og:type" content="website">
+
+    <link rel="icon" type="image/png" href="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -14,12 +24,11 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
         
-        /* TRUCO DE CARGA: Oculta la web hasta que esté lista y le da un fundido elegante */
+        /* TRUCO DE CARGA SUAVE */
         html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
         html.ready { visibility: visible; opacity: 1; }
     </style>
     <script>
-        // Muestra la web de forma suave en cuanto Tailwind y el contenido base cargan
         window.addEventListener('DOMContentLoaded', () => { setTimeout(() => document.documentElement.classList.add('ready'), 150); });
     </script>
 </head>
@@ -381,8 +390,10 @@
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
             document.getElementById('gallery-price-tag').innerText = `$${currentPrice} AUD / Photo`;
-            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden', 'flex-col');
-            if(isAdmin) document.getElementById('admin-upload-area').classList.add('flex-col'); // Fix display
+            
+            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
+            if(isAdmin) document.getElementById('admin-upload-area').classList.add('flex', 'flex-col'); // Fix display
+            
             loadPhotos();
         }
 
@@ -391,25 +402,31 @@
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             currentPhotos = data || [];
-            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
+            
+            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => {
+                // FALLBACK: Si la foto es antigua y no tiene 'url_original', usamos la normal para que no se rompa nada
+                const safeUrlOriginal = p.url_original ? p.url_original : p.url_watermarked;
+                
+                return `
                 <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
                     <div class="watermark-overlay pointer-events-none"></div>
                     <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
                     <div class="absolute top-3 left-3 z-10">
-                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', '${p.url_original}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
+                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', '${safeUrlOriginal}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
                     </div>
                     ${isAdmin ? `
                         <button onclick="setAsCover('${p.url_watermarked}')" class="absolute bottom-2 left-2 bg-white/90 text-gray-900 px-2 py-1 rounded text-[10px] font-bold shadow z-10 hover:bg-black hover:text-white transition">★ Set Cover</button>
                         <button onclick="deletePhoto('${p.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs shadow z-10 hover:bg-red-600">✕</button>
                     ` : ''}
-                </div>`).join('');
+                </div>`;
+            }).join('');
         }
 
         async function setAsCover(url) { await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId); alert("Cover updated!"); }
         async function deletePhoto(id) { if(confirm("Delete?")) { await client.from('photos').delete().eq('id', id); loadPhotos(); } }
 
-        // --- SISTEMA DOBLE DE SUBIDA ---
+        // --- SISTEMA DOBLE DE SUBIDA EN PARALELO (TURBO) ---
         function handleWebFiles(e) { 
             webUploads = Array.from(e.target.files); 
             document.getElementById('lbl-web').innerText = `✓ ${webUploads.length} Web`;
@@ -426,36 +443,32 @@
             if(webUploads.length > 0 && origUploads.length > 0) { document.getElementById('start-upload-btn').classList.remove('hidden'); }
         }
 
-  async function startDualUpload() {
+        async function startDualUpload() {
             if(webUploads.length !== origUploads.length) {
                 if(!confirm(`Warning: You selected ${webUploads.length} Web photos and ${origUploads.length} High-Res photos. They should be equal. Continue?`)) return;
             }
 
             const container = document.getElementById('upload-progress-container');
             const progressBar = document.getElementById('progress-bar');
-            const statusText = document.getElementById('upload-status-text'); // Seleccionamos el texto para actualizarlo
+            const statusText = document.getElementById('upload-status-text');
             container.classList.remove('hidden');
             let uploadedCount = 0;
             const totalFiles = webUploads.length;
 
-            // Ordenamos alfabéticamente
             webUploads.sort((a,b) => a.name.localeCompare(b.name));
             origUploads.sort((a,b) => a.name.localeCompare(b.name));
 
-            // 🚀 TRUCO TURBO: Subir en lotes de 3 a la vez (abre 3 carriles de subida simultáneos)
             const batchSize = 3; 
 
             for (let i = 0; i < totalFiles; i += batchSize) {
                 const batch = [];
-                
                 for (let j = 0; j < batchSize && (i + j) < totalFiles; j++) {
                     const index = i + j;
                     const webFile = webUploads[index];
                     const origFile = origUploads[index] || webFile;
                     const timestamp = Date.now();
-                    const safeName = webFile.name.replace(/\s+/g, '_');
+                    const safeName = webFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
 
-                    // Empaquetamos la subida doble en un "proceso" y lo metemos en el lote
                     const uploadProcess = Promise.all([
                         client.storage.from('clips').upload(`watermarked/${timestamp}-web-${safeName}`, webFile),
                         client.storage.from('clips').upload(`originals/${timestamp}-orig-${safeName}`, origFile)
@@ -469,19 +482,16 @@
                         }
                         uploadedCount++;
                         progressBar.style.width = `${Math.round((uploadedCount / totalFiles) * 100)}%`;
-                        statusText.innerText = `Uploading... ${uploadedCount} / ${totalFiles}`;
+                        if(statusText) statusText.innerText = `Uploading... ${uploadedCount} / ${totalFiles}`;
                     });
-
                     batch.push(uploadProcess);
                 }
-                
-                // Le decimos al navegador: "Ejecuta estas 3 subidas A LA VEZ, y avísame cuando acaben todas"
                 await Promise.all(batch);
             }
             
             setTimeout(() => { 
                 container.classList.add('hidden'); progressBar.style.width = '0%'; 
-                statusText.innerText = 'Uploading and matching files...';
+                if(statusText) statusText.innerText = 'Uploading and matching files...';
                 webUploads = []; origUploads = [];
                 document.getElementById('lbl-web').innerText = '1. Web Photos'; document.getElementById('lbl-web').classList.replace('bg-green-100', 'bg-gray-100');
                 document.getElementById('lbl-orig').innerText = '2. High-Res'; document.getElementById('lbl-orig').classList.replace('bg-green-100', 'bg-gray-100');
@@ -489,6 +499,97 @@
                 loadPhotos(); 
             }, 1000);
         }
+
+        // --- CARRITO DE LA COMPRA ---
+        function toggleCart(urlWeb, urlOrig, el) {
+            if(el.checked) {
+                cart.push({url: urlWeb, url_orig: urlOrig, price: currentPrice}); 
+            } else {
+                cart = cart.filter(c => c.url !== urlWeb);
+            }
+            updateCartUI();
+        }
+
+        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.length;
+            document.getElementById('cart-items').innerHTML = cart.map(c => `
+                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
+                    <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
+                        <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false">
+                        <div class="watermark-overlay pointer-events-none"></div>
+                    </div>
+                    <div class="flex-grow">
+                        <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
+                        <p class="font-bold text-gray-900">$${c.price} AUD</p>
+                    </div>
+                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
+                </div>`).join('');
+
+            const subtotal = cart.reduce((a, b) => a + b.price, 0);
+            let finalAmount = subtotal, discount = 0, discountName = "";
+
+            if (cart.length >= 10) { discountName = "Full Collection"; finalAmount = 150 + ((cart.length - 10) * (cart[0]?.price || 20)); } 
+            else if (cart.length >= 5) { discountName = "Session Pack"; finalAmount = 90 + ((cart.length - 5) * (cart[0]?.price || 20)); } 
+            else if (cart.length >= 2) { discountName = "Starter Pack"; finalAmount = 30 + ((cart.length - 2) * (cart[0]?.price || 20)); }
+
+            if (finalAmount < subtotal) {
+                discount = subtotal - finalAmount;
+                document.getElementById('pack-discount-row').classList.remove('hidden');
+                document.getElementById('pack-name').innerText = `Pack Discount (${discountName})`;
+            } else { document.getElementById('pack-discount-row').classList.add('hidden'); }
+
+            document.getElementById('cart-qty').innerText = cart.length;
+            document.getElementById('cart-subtotal').innerText = `$${subtotal} AUD`;
+            document.getElementById('cart-discount').innerText = `-$${discount} AUD`;
+            document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
+            document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
+            window.currentFinalPrice = finalAmount;
+        }
+
+        function removeFromCart(url) { cart = cart.filter(c => c.url !== url); updateCartUI(); if(currentSessionId) loadPhotos(); }
+
+        async function checkout() {
+            if(!cart.length) return alert("Your cart is empty.");
+            const btn = document.getElementById('checkout-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = "REDIRECTING..."; btn.disabled = true;
+            try {
+                // Recuperamos las URLs originales, si no hay (fotos antiguas), usamos la url normal
+                const cartUrls = cart.map(c => c.url_orig || c.url);
+                const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
+                    body: JSON.stringify({ photos: cartUrls, amount: window.currentFinalPrice })
+                });
+                const data = await res.json();
+                if (data && data.url) window.location.href = data.url; 
+                else throw new Error(data.error || "No Stripe session returned");
+            } catch (error) { 
+                alert("Error: " + error.message); 
+                btn.innerHTML = originalText; 
+                btn.disabled = false; 
+            }
+        }
+
+        function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
+        function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
+        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
+        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
+        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
+
+        async function loadPacks() {
+            const { data } = await client.from('packs').select('*').order('id');
+            document.getElementById('packs-container').innerHTML = (data || []).map(p => `
+                <div class="bg-white p-10 rounded-[2rem] text-center border border-gray-100 shadow-xl hover:-translate-y-2 transition duration-300">
+                    <h3 class="text-2xl font-serif font-bold mb-2">${p.name}</h3>
+                    <p class="text-gray-400 text-xs font-bold mb-6">${p.photos_count} PHOTOS INCLUDED</p>
+                    <div class="text-5xl font-bold mb-8 text-blue-950">$${p.price}<span class="text-sm text-gray-400 ml-1">AUD</span></div>
+                    <button onclick="showPage('sessions-page')" class="bg-gray-900 w-full py-4 rounded-xl text-white font-bold hover:bg-black transition">BROWSE SESSIONS</button>
+                </div>`).join('');
+        }
+
         async function submitContactForm(e) {
             e.preventDefault();
             const btn = document.getElementById('contact-submit-btn');
