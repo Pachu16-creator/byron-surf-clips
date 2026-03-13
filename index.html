@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Byron Surf Clips | Capture the Wave</title>
 
-    <meta name="description" content="Find yourself in the waves. High-resolution surf photography from Byron Bay, Australia.">
+    <meta name="description" content="Find yourself in the waves. High-resolution surf photography from Byron Bay.">
     <meta property="og:title" content="Byron Surf Clips | Capture the Wave">
-    <meta property="og:description" content="Get your high-quality surf photos from Byron Bay. Capture your best waves!">
+    <meta property="og:description" content="Get your high-quality surf photos from Byron Bay.">
     <meta property="og:image" content="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg"> 
     <meta property="og:url" content="https://byronsurfclips.com">
     <meta property="og:type" content="website">
@@ -22,15 +22,11 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
-        
-        /* TRUCO DE CARGA SUAVE */
-        html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
+        .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.15; pointer-events: none; }
+        html { visibility: hidden; opacity: 0; transition: opacity 0.4s ease; }
         html.ready { visibility: visible; opacity: 1; }
     </style>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => { setTimeout(() => document.documentElement.classList.add('ready'), 150); });
-    </script>
+    <script>window.addEventListener('DOMContentLoaded', () => { setTimeout(() => document.documentElement.classList.add('ready'), 100); });</script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col relative text-gray-900">
 
@@ -40,14 +36,11 @@
             <button onclick="showPage('sessions-page')" class="hover:text-blue-300 transition">Find My Shot</button>
             <button onclick="showPage('packs-page')" class="hover:text-blue-300 transition">Packs</button>
             <button onclick="showPage('contact-page')" class="hover:text-blue-300 transition">Contact</button>
-            
             <div class="flex gap-4 items-center ml-4">
-                <button onclick="document.getElementById('auth-modal').classList.remove('hidden')" title="Admin Login">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5"></path></svg>
-                </button>
-                <button onclick="toggleCartModal()" class="relative" title="Open Cart">
+                <button onclick="document.getElementById('auth-modal').classList.remove('hidden')" title="Admin Login"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5"></path></svg></button>
+                <button onclick="toggleCartModal()" class="relative">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5"></path></svg>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">0</span>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-sm">0</span>
                 </button>
             </div>
         </div>
@@ -56,35 +49,11 @@
     <main class="flex-grow">
         <section id="landing-page" class="hero-bg h-screen flex flex-col items-center justify-center text-center p-6 text-white relative">
             <div id="hero-admin-btn" class="hidden absolute top-24 right-8 bg-black/50 p-2 rounded-xl backdrop-blur-md border border-white/20 z-20">
-                <label class="cursor-pointer text-xs font-bold text-white flex items-center gap-2">
-                    ⚙️ Change BG <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)">
-                </label>
+                <label class="cursor-pointer text-xs font-bold text-white flex items-center gap-2">⚙️ Change BG <input type="file" class="hidden" accept="image/*" onchange="updateHeroBg(event)"></label>
             </div>
             <h1 class="text-6xl md:text-8xl font-serif font-bold mb-4 tracking-tighter drop-shadow-lg">Byron Surf Clips</h1>
             <p class="text-lg md:text-xl mb-10 max-w-lg opacity-90 font-light drop-shadow-md">Capturing the essence of Byron Bay's waves.</p>
-            <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all duration-300 shadow-xl">Find My Shot</button>
-        </section>
-
-        <section id="success-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center px-6 h-screen">
-            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
-                <div class="w-24 h-24 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                </div>
-                <h2 class="font-serif text-4xl font-bold mb-4 text-gray-900">Payment Successful!</h2>
-                <p class="text-gray-500 mb-8 font-medium">Thank you for your purchase. We are processing your order and you will receive an email shortly with the secure link to download your high-resolution photos.</p>
-                <button onclick="showPage('landing-page')" class="w-full bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-black transition uppercase tracking-widest text-sm">Return to Home</button>
-            </div>
-        </section>
-
-        <section id="cancel-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center text-center px-6 h-screen">
-            <div class="bg-white p-12 rounded-[2rem] shadow-xl max-w-lg w-full border border-gray-100">
-                <div class="w-24 h-24 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <svg class="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </div>
-                <h2 class="font-serif text-4xl font-bold mb-4 text-gray-900">Checkout Cancelled</h2>
-                <p class="text-gray-500 mb-8 font-medium">Your payment process was cancelled and no charges were made. Your photos are still saved in your cart whenever you're ready.</p>
-                <button onclick="showPage('sessions-page')" class="w-full bg-gray-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-black transition uppercase tracking-widest text-sm">Browse Sessions</button>
-            </div>
+            <button onclick="showPage('sessions-page')" class="bg-white/10 backdrop-blur-sm border border-white/50 px-10 py-3 rounded-full font-semibold text-sm hover:bg-white hover:text-black transition-all shadow-xl">Find My Shot</button>
         </section>
 
         <section id="sessions-page" class="hidden pt-32 px-6 max-w-7xl mx-auto pb-20">
@@ -94,47 +63,40 @@
                     <span id="admin-email-display" class="bg-blue-50 text-blue-800 text-xs font-bold px-3 py-1 rounded-full"></span>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <input type="text" id="new-loc" placeholder="Location (e.g. Wategos)" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
-                    <input type="text" id="new-time" placeholder="Time (e.g. 6am - 8am)" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
+                    <input type="text" id="new-loc" placeholder="Location" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
+                    <input type="text" id="new-time" placeholder="Time (e.g. 6-8am)" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
                     <input type="date" id="new-date" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
-                    <input type="number" id="new-price" placeholder="Price per photo ($)" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
-                    <button onclick="createSession()" class="bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition shadow-md">Publish Session</button>
+                    <input type="number" id="new-price" placeholder="Price ($)" class="border p-3 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100">
+                    <button onclick="createSession()" class="bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-500 transition shadow-md">Publish</button>
                 </div>
                 <button onclick="logout()" class="mt-4 text-xs text-red-500 font-bold hover:underline">Sign Out</button>
             </section>
 
             <div id="sessions-grid-container">
                 <h2 class="font-serif text-5xl font-bold mb-4">Find My Shot</h2>
-                <p class="text-gray-500 mb-8">Browse recent sessions and find yourself in the waves.</p>
-                <section class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
-                    <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
+                <div class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
+                    <input type="text" id="filter-loc" placeholder="Search location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
                     <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
-                </section>
+                </div>
                 <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
             
             <div id="view-gallery" class="hidden">
-                <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest transition">← Back to Find My Shot</button>
+                <button onclick="showSessions()" class="text-xs font-bold text-gray-400 hover:text-black mb-8 uppercase tracking-widest transition">← Back to Gallery</button>
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
-                    <div class="flex items-center gap-4">
-                        <span id="gallery-price-tag" class="bg-blue-50 text-blue-800 px-4 py-2 rounded-full font-bold text-sm shadow-sm"></span>
-                        
-                        <div id="admin-upload-area" class="hidden flex-col gap-2 items-end">
-                            <div class="flex gap-2">
-                                <input type="file" id="web-files" multiple class="hidden" onchange="handleWebFiles(event)">
-                                <label for="web-files" id="lbl-web" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 shadow-sm transition">1. Web Photos</label>
-
-                                <input type="file" id="orig-files" multiple class="hidden" onchange="handleOrigFiles(event)">
-                                <label for="orig-files" id="lbl-orig" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 shadow-sm transition">2. High-Res</label>
-                            </div>
-                            <button id="start-upload-btn" onclick="startDualUpload()" class="hidden bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition w-full shadow-md text-center">3. START UPLOAD</button>
+                    <div id="admin-upload-area" class="hidden flex flex-col gap-2 items-end">
+                        <div class="flex gap-2">
+                            <input type="file" id="web-files" multiple class="hidden" onchange="handleWebFiles(event)">
+                            <label for="web-files" id="lbl-web" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 transition">1. Web Photos</label>
+                            <input type="file" id="orig-files" multiple class="hidden" onchange="handleOrigFiles(event)">
+                            <label for="orig-files" id="lbl-orig" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 transition">2. High-Res</label>
                         </div>
-
+                        <button id="start-upload-btn" onclick="startDualUpload()" class="hidden bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition w-full shadow-md">3. START UPLOAD</button>
                     </div>
                 </div>
                 <div id="upload-progress-container" class="hidden mb-8 max-w-md">
-                    <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mb-1" id="upload-status-text">Uploading and matching files...</p>
+                    <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mb-1" id="upload-status-text">Uploading...</p>
                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
@@ -143,125 +105,75 @@
             </div>
         </section>
 
-        <section id="contact-page" class="hidden pt-32 pb-20 flex flex-col items-center justify-center px-6 max-w-3xl mx-auto">
-            <h2 class="font-serif text-5xl font-bold mb-6 text-gray-900 text-center">Get In Touch</h2>
-            <p class="text-gray-500 text-center mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
-            
-            <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl w-full border border-gray-100 relative">
-                <div id="contact-success" class="hidden absolute inset-0 bg-white rounded-[2rem] flex-col items-center justify-center text-center p-8 z-10">
-                    <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <h3 class="font-serif text-3xl font-bold mb-2">Message Sent!</h3>
-                    <p class="text-gray-500">Thanks for reaching out. We'll get back to you as soon as possible.</p>
-                    <button onclick="resetContactForm()" class="mt-8 text-sm font-bold text-gray-400 hover:text-black uppercase tracking-widest transition">Send another message</button>
-                </div>
+        <section id="packs-page" class="hidden pt-32 pb-20 px-6 max-w-6xl mx-auto text-center">
+            <h2 class="text-5xl font-serif font-bold mb-4">Photo Packs</h2>
+            <p class="text-gray-500 mb-12">Save more when you buy multiple photos from the same session.</p>
+            <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+        </section>
 
+        <section id="contact-page" class="hidden pt-32 pb-20 px-6 max-w-3xl mx-auto">
+            <h2 class="font-serif text-5xl font-bold mb-12 text-center">Contact</h2>
+            <div class="bg-white p-12 rounded-[2rem] shadow-xl border border-gray-100 relative">
+                <div id="contact-success" class="hidden absolute inset-0 bg-white rounded-[2rem] flex flex-col items-center justify-center text-center p-8 z-10">
+                    <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-4"><svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="3" d="M5 13l4 4L19 7"></path></svg></div>
+                    <h3 class="text-2xl font-bold">Sent!</h3><p class="text-gray-500">We'll get back to you soon.</p>
+                </div>
                 <form id="contact-form" onsubmit="submitContactForm(event)" class="space-y-6">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Name</label>
-                        <input type="text" id="contact-name" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Your Email</label>
-                        <input type="email" id="contact-email" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 transition">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Message</label>
-                        <textarea id="contact-message" rows="4" required class="w-full border p-4 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 bg-gray-50 resize-none transition"></textarea>
-                    </div>
-                    <button type="submit" id="contact-submit-btn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition shadow-lg flex justify-center items-center gap-2">
-                        Send Message
-                    </button>
+                    <input type="text" id="contact-name" placeholder="Full Name" required class="w-full border p-4 rounded-xl outline-none bg-gray-50">
+                    <input type="email" id="contact-email" placeholder="Email Address" required class="w-full border p-4 rounded-xl outline-none bg-gray-50">
+                    <textarea id="contact-message" placeholder="How can we help?" rows="4" required class="w-full border p-4 rounded-xl outline-none bg-gray-50 resize-none"></textarea>
+                    <button type="submit" id="contact-submit-btn" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition">Send Message</button>
                 </form>
             </div>
         </section>
 
-        <section id="packs-page" class="hidden pt-32 pb-20 px-6">
-            <h2 class="text-5xl font-serif font-bold text-center mb-4 text-gray-900">Photo Packs</h2>
-            <p class="text-center text-gray-500 mb-12">Save more when you buy more photos together.</p>
-            <div id="packs-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto"></div>
-        </section>
+        <section id="success-page" class="hidden pt-32 flex flex-col items-center justify-center text-center h-screen"><div class="bg-white p-12 rounded-3xl shadow-xl max-w-md"><h2 class="font-serif text-4xl font-bold mb-4">Payment Success!</h2><p class="text-gray-500 mb-8">Photos are flying to your email.</p><button onclick="showPage('landing-page')" class="bg-gray-900 text-white px-8 py-3 rounded-xl">Back Home</button></div></section>
+        <section id="cancel-page" class="hidden pt-32 flex flex-col items-center justify-center text-center h-screen"><div><h2 class="text-4xl font-serif font-bold">Cancelled</h2><button onclick="showPage('sessions-page')" class="mt-8 bg-gray-900 text-white px-8 py-3 rounded-xl">Back to sessions</button></div></section>
     </main>
 
-    <footer class="bg-[#0a1120] text-white py-16 px-8 mt-auto">
+    <footer class="bg-[#0a1120] text-white py-16 px-8 mt-auto text-center md:text-left">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div class="text-center md:text-left">
-                <h2 class="font-serif text-2xl font-bold mb-1">Byron Surf Clips</h2>
-                <p class="text-gray-400 text-xs">Capturing waves, one frame at a time.</p>
-                <div class="flex gap-4 justify-center md:justify-start mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
-                    <button onclick="openLegalModal('privacy')" class="hover:text-white transition">Privacy Policy</button>
-                    <button onclick="openLegalModal('terms')" class="hover:text-white transition">Terms of Service</button>
-                </div>
+            <div><h2 class="font-serif text-2xl font-bold">Byron Surf Clips</h2><p class="text-gray-400 text-xs">Capturing waves since 2026.</p></div>
+            <div class="flex gap-6 text-xs font-bold uppercase tracking-widest text-gray-500">
+                <button onclick="openLegalModal('privacy')" class="hover:text-white transition">Privacy</button>
+                <button onclick="openLegalModal('terms')" class="hover:text-white transition">Terms</button>
             </div>
-            <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                <button onclick="showPage('sessions-page')" class="hover:text-white transition">Find My Shot</button>
-                <button onclick="showPage('packs-page')" class="hover:text-white transition">Packs</button>
-                <button onclick="showPage('contact-page')" class="hover:text-white transition">Contact</button>
-            </div>
-            <a href="https://instagram.com/byron.surf.clips" target="_blank" class="text-gray-400 hover:text-white transition">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-            </a>
         </div>
     </footer>
 
     <div id="auth-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center">
         <div class="bg-white p-8 rounded-3xl w-full max-w-sm text-center relative shadow-2xl">
-            <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-black">✕</button>
+            <button onclick="document.getElementById('auth-modal').classList.add('hidden')" class="absolute top-4 right-4">✕</button>
             <h3 class="font-serif text-2xl mb-4">Admin Access</h3>
-            <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 rounded-xl outline-none mb-4 focus:ring-2 focus:ring-gray-900">
-            <button id="login-btn" onclick="login()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black transition">Send Magic Link</button>
+            <input type="email" id="login-email" placeholder="Email" class="w-full border p-3 rounded-xl outline-none mb-4 focus:ring-2 focus:ring-black">
+            <button id="login-btn" onclick="login()" class="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-black transition">Magic Link</button>
         </div>
     </div>
 
     <div id="cart-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex justify-end">
-        <div class="bg-white w-full max-w-md h-full p-8 overflow-y-auto flex flex-col shadow-2xl">
-            <div class="flex justify-between items-center mb-8">
-                <h2 class="text-3xl font-serif font-bold">Your Cart</h2>
-                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black text-2xl">✕</button>
-            </div>
+        <div class="bg-white w-full max-w-md h-full p-8 flex flex-col shadow-2xl">
+            <div class="flex justify-between items-center mb-8"><h2 class="text-3xl font-serif font-bold">Your Cart</h2><button onclick="toggleCartModal()">✕</button></div>
             <div id="cart-items" class="flex-grow space-y-4 overflow-y-auto pr-2 no-scrollbar"></div>
-            
             <div class="pt-6 border-t mt-6">
-                <div class="flex justify-between text-gray-500 text-sm mb-2">
-                    <span>Subtotal (<span id="cart-qty">0</span> photos)</span>
-                    <span id="cart-subtotal">$0 AUD</span>
-                </div>
-                <div id="pack-discount-row" class="hidden flex justify-between text-emerald-500 text-sm font-bold mb-4">
-                    <span id="pack-name">Pack Discount</span>
-                    <span id="cart-discount">-$0 AUD</span>
-                </div>
-                <div class="flex justify-between items-center font-bold text-xl mb-6 mt-4">
-                    <span>Total</span>
-                    <span id="cart-total" class="text-3xl font-serif">$0 AUD</span>
-                </div>
-                <button id="checkout-btn" onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg flex justify-center gap-2 items-center">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2h3a1 1 0 100-2h-3z"></path></svg>
-                    Pay <span id="pay-btn-amt">$0 AUD</span>
-                </button>
-                <p class="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest">🔒 Secure checkout</p>
+                <div id="pack-discount-row" class="hidden flex justify-between text-emerald-600 font-bold mb-2"><span id="pack-name">Pack</span><span id="cart-discount">-$0</span></div>
+                <div class="flex justify-between items-center font-bold text-xl mb-6"><span>Total</span><span id="cart-total" class="text-3xl font-serif">$0 AUD</span></div>
+                <button id="checkout-btn" onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg">PAY <span id="pay-btn-amt">$0 AUD</span></button>
             </div>
         </div>
     </div>
 
     <div id="legal-modal" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl relative">
-            <button onclick="closeLegalModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl z-10">✕</button>
-            <div class="p-8 pb-6 border-b border-gray-100">
-                <h2 id="legal-title" class="text-3xl font-serif font-bold text-gray-900"></h2>
-            </div>
-            <div id="legal-content" class="p-8 overflow-y-auto text-sm text-gray-600 space-y-4 no-scrollbar"></div>
+        <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] flex flex-col relative overflow-hidden">
+            <button onclick="closeLegalModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black">✕</button>
+            <div class="p-8 overflow-y-auto no-scrollbar" id="legal-content"></div>
         </div>
     </div>
 
     <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
-        <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
-        <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
-            <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
-            <div class="watermark-overlay opacity-30 pointer-events-none"></div>
-        </div>
-        <button onclick="nextPhoto()" class="absolute right-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
+        <button onclick="prevPhoto()" class="absolute left-6 text-white text-5xl">❮</button>
+        <div class="relative max-w-5xl"><img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl"><div class="watermark-overlay opacity-30"></div></div>
+        <button onclick="nextPhoto()" class="absolute right-6 text-white text-5xl">❯</button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-3xl">✕</button>
     </div>
 
     <script>
@@ -271,56 +183,22 @@
         
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0;
         let isAdmin = false, currentSessionId = null, currentPrice = 20;
-
-        // Variables para la Subida Doble
-        let webUploads = [];
-        let origUploads = [];
+        let webUploads = [], origUploads = [];
 
         function showPage(pageId) {
-            ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'success-page', 'cancel-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'success-page', 'cancel-page'].forEach(id => {
+                const el = document.getElementById(id); if(el) el.classList.add('hidden');
+            });
             document.getElementById(pageId).classList.remove('hidden');
-            window.scrollTo(0,0);
-            
             const nav = document.getElementById('main-nav');
-            if(pageId === 'landing-page' || pageId === 'success-page' || pageId === 'cancel-page') {
-                nav.classList.add('text-white'); 
-                nav.classList.remove('text-gray-900', 'bg-white/90', 'border-b', 'shadow-sm');
+            if(['landing-page', 'success-page', 'cancel-page'].includes(pageId)) {
+                nav.classList.add('text-white'); nav.classList.remove('text-gray-900', 'bg-white/90', 'border-b');
             } else {
-                nav.classList.remove('text-white'); 
-                nav.classList.add('text-gray-900', 'bg-white/90', 'border-b', 'shadow-sm');
+                nav.classList.remove('text-white'); nav.classList.add('text-gray-900', 'bg-white/90', 'border-b');
             }
-
             if(pageId === 'sessions-page') loadSessions();
             if(pageId === 'packs-page') loadPacks();
-        }
-
-        function checkUrlStatus() {
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('status') === 'success') {
-                showPage('success-page');
-                cart = []; updateCartUI();
-                window.history.replaceState({}, document.title, window.location.pathname);
-            } else if (urlParams.get('status') === 'cancel') {
-                showPage('cancel-page');
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
-        }
-
-        async function loadSiteSettings() {
-            const { data } = await client.from('site_settings').select('*').eq('id', 'main').single();
-            if (data?.hero_bg_url) {
-                document.getElementById('landing-page').style.backgroundImage = `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${data.hero_bg_url}')`;
-            }
-        }
-
-        async function updateHeroBg(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const { error, data } = await client.storage.from('clips').upload(`hero/${Date.now()}-${file.name.replace(/\s+/g, '_')}`, file);
-            if (!error) {
-                await client.from('site_settings').upsert({ id: 'main', hero_bg_url: `${SUPA_URL}/storage/v1/object/public/clips/${data.path}` });
-                alert("Hero background updated!"); location.reload();
-            }
+            window.scrollTo(0,0);
         }
 
         async function checkUser() {
@@ -330,16 +208,15 @@
                 document.getElementById('admin-panel').classList.remove('hidden');
                 document.getElementById('hero-admin-btn').classList.remove('hidden');
                 document.getElementById('admin-email-display').innerText = user.email;
+                if(currentSessionId) document.getElementById('admin-upload-area').classList.remove('hidden');
             }
         }
-        
+
         async function login() {
-            const email = document.getElementById('login-email').value;
-            if(!email) return;
-            document.getElementById('login-btn').innerText = "Sending...";
+            const email = document.getElementById('login-email').value; if(!email) return;
+            const btn = document.getElementById('login-btn'); btn.innerText = "Sending...";
             const { error } = await client.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
-            document.getElementById('login-btn').innerText = "Send Magic Link";
-            if (!error) { alert("Magic link sent!"); document.getElementById('auth-modal').classList.add('hidden'); }
+            btn.innerText = "Magic Link"; if (!error) alert("Email sent!");
         }
         
         async function logout() { await client.auth.signOut(); location.reload(); }
@@ -351,16 +228,12 @@
 
         function renderSessions(list) {
             document.getElementById('sessions-grid').innerHTML = list.map(s => `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 20})">
-                    <div class="relative h-56 w-full"><img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-full object-cover"></div>
-                    <div class="p-5">
-                        <h3 class="font-serif font-bold text-2xl text-gray-900 mb-4">${s.location}</h3>
-                        <div class="flex flex-wrap gap-2 text-[10px] text-gray-600 font-bold uppercase tracking-wider">
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">📍 ${s.location}</span>
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">📅 ${s.date || 'Recent'}</span>
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">⏱️ ${s.time_range || 'Morning'}</span>
-                        </div>
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 transition">Delete Session</button>` : ''}
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition" onclick="openGallery('${s.id}', '${s.location}', ${s.price})">
+                    <div class="relative h-60 w-full"><img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-full object-cover"></div>
+                    <div class="p-6">
+                        <h3 class="font-serif font-bold text-2xl mb-2">${s.location}</h3>
+                        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">${s.date} • ${s.time_range}</p>
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="text-red-500 font-bold text-xs hover:underline">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
         }
@@ -373,249 +246,169 @@
 
         async function createSession() {
             if(!isAdmin) return;
-            const location = document.getElementById('new-loc').value;
-            const time_range = document.getElementById('new-time').value;
-            const date = document.getElementById('new-date').value;
-            const price = parseFloat(document.getElementById('new-price').value) || 20; 
-            if(!location) return;
-            const { error } = await client.from('sessions').insert([{ location, time_range, date, price }]);
-            if (!error) { document.getElementById('new-loc').value = ''; loadSessions(); }
+            const [loc, time, date, price] = [document.getElementById('new-loc').value, document.getElementById('new-time').value, document.getElementById('new-date').value, document.getElementById('new-price').value];
+            if(!loc) return;
+            await client.from('sessions').insert([{ location: loc, time_range: time, date, price: parseFloat(price) }]);
+            loadSessions();
         }
-
-        async function deleteSession(id) { if (confirm("Are you sure?")) { await client.from('sessions').delete().eq('id', id); loadSessions(); } }
 
         async function openGallery(id, title, price) {
             currentSessionId = id; currentPrice = price || 20;
             document.getElementById('sessions-grid-container').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
-            document.getElementById('gallery-price-tag').innerText = `$${currentPrice} AUD / Photo`;
-            
             if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
-            if(isAdmin) document.getElementById('admin-upload-area').classList.add('flex', 'flex-col'); // Fix display
-            
             loadPhotos();
         }
-
-        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
 
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             currentPhotos = data || [];
-            
-            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => {
-                // FALLBACK: Si la foto es antigua y no tiene 'url_original', usamos la normal para que no se rompa nada
-                const safeUrlOriginal = p.url_original ? p.url_original : p.url_watermarked;
-                
-                return `
-                <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
-                    <div class="watermark-overlay pointer-events-none"></div>
-                    <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
-                    <div class="absolute top-3 left-3 z-10">
-                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', '${safeUrlOriginal}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
+            document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
+                <div class="relative group rounded-2xl overflow-hidden aspect-[4/5] border shadow-sm">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover cursor-pointer" onclick="openLightbox(${i})">
+                    <div class="watermark-overlay opacity-20"></div>
+                    <div class="absolute top-4 left-4 z-10">
+                        <input type="checkbox" class="w-6 h-6 accent-blue-600 cursor-pointer" onchange="toggleCart('${p.url_watermarked}', '${p.url_original || p.url_watermarked}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
                     </div>
-                    ${isAdmin ? `
-                        <button onclick="setAsCover('${p.url_watermarked}')" class="absolute bottom-2 left-2 bg-white/90 text-gray-900 px-2 py-1 rounded text-[10px] font-bold shadow z-10 hover:bg-black hover:text-white transition">★ Set Cover</button>
-                        <button onclick="deletePhoto('${p.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full text-xs shadow z-10 hover:bg-red-600">✕</button>
-                    ` : ''}
-                </div>`;
-            }).join('');
+                    ${isAdmin ? `<button onclick="deletePhoto('${p.id}')" class="absolute top-2 right-2 bg-red-500 text-white w-6 h-6 rounded-full">✕</button>` : ''}
+                </div>`).join('');
         }
 
-        async function setAsCover(url) { await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId); alert("Cover updated!"); }
-        async function deletePhoto(id) { if(confirm("Delete?")) { await client.from('photos').delete().eq('id', id); loadPhotos(); } }
-
-        // --- SISTEMA DOBLE DE SUBIDA EN PARALELO (TURBO) ---
-        function handleWebFiles(e) { 
-            webUploads = Array.from(e.target.files); 
-            document.getElementById('lbl-web').innerText = `✓ ${webUploads.length} Web`;
-            document.getElementById('lbl-web').classList.replace('bg-gray-100', 'bg-green-100');
-            checkUploadReady(); 
-        }
-        function handleOrigFiles(e) { 
-            origUploads = Array.from(e.target.files); 
-            document.getElementById('lbl-orig').innerText = `✓ ${origUploads.length} High-Res`;
-            document.getElementById('lbl-orig').classList.replace('bg-gray-100', 'bg-green-100');
-            checkUploadReady(); 
-        }
-        function checkUploadReady() {
-            if(webUploads.length > 0 && origUploads.length > 0) { document.getElementById('start-upload-btn').classList.remove('hidden'); }
+        // --- PARALLEL TURBO UPLOAD ---
+        function handleWebFiles(e) { webUploads = Array.from(e.target.files); checkReady(); }
+        function handleOrigFiles(e) { origUploads = Array.from(e.target.files); checkReady(); }
+        function checkReady() { 
+            if(webUploads.length) document.getElementById('lbl-web').innerText = `✓ ${webUploads.length}`;
+            if(origUploads.length) document.getElementById('lbl-orig').innerText = `✓ ${origUploads.length}`;
+            if(webUploads.length && origUploads.length) document.getElementById('start-upload-btn').classList.remove('hidden');
         }
 
         async function startDualUpload() {
-            if(webUploads.length !== origUploads.length) {
-                if(!confirm(`Warning: You selected ${webUploads.length} Web photos and ${origUploads.length} High-Res photos. They should be equal. Continue?`)) return;
-            }
-
-            const container = document.getElementById('upload-progress-container');
-            const progressBar = document.getElementById('progress-bar');
-            const statusText = document.getElementById('upload-status-text');
-            container.classList.remove('hidden');
-            let uploadedCount = 0;
-            const totalFiles = webUploads.length;
-
+            const total = webUploads.length;
+            const bar = document.getElementById('progress-bar');
+            document.getElementById('upload-progress-container').classList.remove('hidden');
             webUploads.sort((a,b) => a.name.localeCompare(b.name));
             origUploads.sort((a,b) => a.name.localeCompare(b.name));
 
-            const batchSize = 3; 
-
-            for (let i = 0; i < totalFiles; i += batchSize) {
+            const batchSize = 3;
+            for (let i = 0; i < total; i += batchSize) {
                 const batch = [];
-                for (let j = 0; j < batchSize && (i + j) < totalFiles; j++) {
-                    const index = i + j;
-                    const webFile = webUploads[index];
-                    const origFile = origUploads[index] || webFile;
+                for (let j = 0; j < batchSize && (i + j) < total; j++) {
+                    const idx = i + j;
                     const timestamp = Date.now();
-                    const safeName = webFile.name.replace(/[^a-zA-Z0-9.\-_]/g, '');
-
-                    const uploadProcess = Promise.all([
-                        client.storage.from('clips').upload(`watermarked/${timestamp}-web-${safeName}`, webFile),
-                        client.storage.from('clips').upload(`originals/${timestamp}-orig-${safeName}`, origFile)
-                    ]).then(async ([resWeb, resOrig]) => {
-                        if (!resWeb.error && !resOrig.error) {
+                    const name = webUploads[idx].name.replace(/[^a-zA-Z0-9.\-_]/g, '');
+                    const proc = Promise.all([
+                        client.storage.from('clips').upload(`watermarked/${timestamp}-web-${name}`, webUploads[idx]),
+                        client.storage.from('clips').upload(`originals/${timestamp}-orig-${name}`, origUploads[idx])
+                    ]).then(async ([resW, resO]) => {
+                        if (!resW.error && !resO.error) {
                             await client.from('photos').insert([{ 
                                 session_id: currentSessionId, 
-                                url_watermarked: `${SUPA_URL}/storage/v1/object/public/clips/${resWeb.data.path}`, 
-                                url_original: `${SUPA_URL}/storage/v1/object/public/clips/${resOrig.data.path}` 
+                                url_watermarked: `${SUPA_URL}/storage/v1/object/public/clips/${resW.data.path}`, 
+                                url_original: `${SUPA_URL}/storage/v1/object/public/clips/${resO.data.path}` 
                             }]);
                         }
-                        uploadedCount++;
-                        progressBar.style.width = `${Math.round((uploadedCount / totalFiles) * 100)}%`;
-                        if(statusText) statusText.innerText = `Uploading... ${uploadedCount} / ${totalFiles}`;
                     });
-                    batch.push(uploadProcess);
+                    batch.push(proc);
                 }
                 await Promise.all(batch);
+                bar.style.width = `${Math.round(((i + batch.length) / total) * 100)}%`;
             }
-            
-            setTimeout(() => { 
-                container.classList.add('hidden'); progressBar.style.width = '0%'; 
-                if(statusText) statusText.innerText = 'Uploading and matching files...';
-                webUploads = []; origUploads = [];
-                document.getElementById('lbl-web').innerText = '1. Web Photos'; document.getElementById('lbl-web').classList.replace('bg-green-100', 'bg-gray-100');
-                document.getElementById('lbl-orig').innerText = '2. High-Res'; document.getElementById('lbl-orig').classList.replace('bg-green-100', 'bg-gray-100');
-                document.getElementById('start-upload-btn').classList.add('hidden');
-                loadPhotos(); 
-            }, 1000);
+            alert("Upload successful!"); location.reload();
         }
 
-        // --- CARRITO DE LA COMPRA ---
-        function toggleCart(urlWeb, urlOrig, el) {
-            if(el.checked) {
-                cart.push({url: urlWeb, url_orig: urlOrig, price: currentPrice}); 
-            } else {
-                cart = cart.filter(c => c.url !== urlWeb);
-            }
+        // --- CART & PRICING ---
+        function toggleCart(urlW, urlO, el) {
+            if(el.checked) cart.push({url: urlW, url_orig: urlO, price: currentPrice});
+            else cart = cart.filter(c => c.url !== urlW);
             updateCartUI();
         }
-
-        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
 
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
             document.getElementById('cart-items').innerHTML = cart.map(c => `
-                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
-                    <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
-                        <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false">
-                        <div class="watermark-overlay pointer-events-none"></div>
-                    </div>
-                    <div class="flex-grow">
-                        <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
-                        <p class="font-bold text-gray-900">$${c.price} AUD</p>
-                    </div>
-                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
+                <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border">
+                    <img src="${c.url}" class="w-16 h-16 rounded-xl object-cover">
+                    <div class="flex-grow font-bold">$${c.price} AUD</div>
+                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500">✕</button>
                 </div>`).join('');
 
-            const subtotal = cart.reduce((a, b) => a + b.price, 0);
-            let finalAmount = subtotal, discount = 0, discountName = "";
+            const sub = cart.reduce((a, b) => a + b.price, 0);
+            let final = sub, disc = 0, name = "";
+            if (cart.length >= 10) { name = "Full Collection"; final = 150 + (cart.length - 10) * currentPrice; }
+            else if (cart.length >= 5) { name = "Session Pack"; final = 90 + (cart.length - 5) * currentPrice; }
+            else if (cart.length >= 2) { name = "Starter Pack"; final = 30 + (cart.length - 2) * currentPrice; }
 
-            if (cart.length >= 10) { discountName = "Full Collection"; finalAmount = 150 + ((cart.length - 10) * (cart[0]?.price || 20)); } 
-            else if (cart.length >= 5) { discountName = "Session Pack"; finalAmount = 90 + ((cart.length - 5) * (cart[0]?.price || 20)); } 
-            else if (cart.length >= 2) { discountName = "Starter Pack"; finalAmount = 30 + ((cart.length - 2) * (cart[0]?.price || 20)); }
-
-            if (finalAmount < subtotal) {
-                discount = subtotal - finalAmount;
+            if(final < sub) {
+                disc = sub - final;
                 document.getElementById('pack-discount-row').classList.remove('hidden');
-                document.getElementById('pack-name').innerText = `Pack Discount (${discountName})`;
-            } else { document.getElementById('pack-discount-row').classList.add('hidden'); }
+                document.getElementById('pack-name').innerText = name;
+                document.getElementById('cart-discount').innerText = `-$${disc}`;
+            } else document.getElementById('pack-discount-row').classList.add('hidden');
 
-            document.getElementById('cart-qty').innerText = cart.length;
-            document.getElementById('cart-subtotal').innerText = `$${subtotal} AUD`;
-            document.getElementById('cart-discount').innerText = `-$${discount} AUD`;
-            document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
-            document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
-            window.currentFinalPrice = finalAmount;
+            document.getElementById('cart-total').innerText = `$${final} AUD`;
+            document.getElementById('pay-btn-amt').innerText = `$${final} AUD`;
+            window.finalAmt = final;
         }
 
-        function removeFromCart(url) { cart = cart.filter(c => c.url !== url); updateCartUI(); if(currentSessionId) loadPhotos(); }
-
         async function checkout() {
-            if(!cart.length) return alert("Your cart is empty.");
-            const btn = document.getElementById('checkout-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "REDIRECTING..."; btn.disabled = true;
+            const btn = document.getElementById('checkout-btn'); const originalText = btn.innerHTML;
+            btn.innerText = "REDIRECTING..."; btn.disabled = true;
             try {
-                // Recuperamos las URLs originales, si no hay (fotos antiguas), usamos la url normal
-                const cartUrls = cart.map(c => c.url_orig || c.url);
                 const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
-                    body: JSON.stringify({ photos: cartUrls, amount: window.currentFinalPrice })
+                    body: JSON.stringify({ photos: cart.map(c => c.url_orig), amount: window.finalAmt })
                 });
                 const data = await res.json();
-                if (data && data.url) window.location.href = data.url; 
-                else throw new Error(data.error || "No Stripe session returned");
-            } catch (error) { 
-                alert("Error: " + error.message); 
-                btn.innerHTML = originalText; 
-                btn.disabled = false; 
-            }
+                if(data.url) window.location.href = data.url; else throw new Error();
+            } catch (e) { alert("Payment error"); btn.innerHTML = originalText; btn.disabled = false; }
         }
 
-        function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
+        // --- EXTRAS ---
+        function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
+        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
+        function removeFromCart(url) { cart = cart.filter(c => c.url !== url); updateCartUI(); loadPhotos(); }
+        function openLightbox(i) { currentIndex = i; document.getElementById('lightbox-img').src = currentPhotos[i].url_watermarked; document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
-        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
-        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
-        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
+        function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; openLightbox(currentIndex); }
+        function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; openLightbox(currentIndex); }
 
         async function loadPacks() {
             const { data } = await client.from('packs').select('*').order('id');
             document.getElementById('packs-container').innerHTML = (data || []).map(p => `
-                <div class="bg-white p-10 rounded-[2rem] text-center border border-gray-100 shadow-xl hover:-translate-y-2 transition duration-300">
-                    <h3 class="text-2xl font-serif font-bold mb-2">${p.name}</h3>
-                    <p class="text-gray-400 text-xs font-bold mb-6">${p.photos_count} PHOTOS INCLUDED</p>
-                    <div class="text-5xl font-bold mb-8 text-blue-950">$${p.price}<span class="text-sm text-gray-400 ml-1">AUD</span></div>
-                    <button onclick="showPage('sessions-page')" class="bg-gray-900 w-full py-4 rounded-xl text-white font-bold hover:bg-black transition">BROWSE SESSIONS</button>
+                <div class="bg-white p-10 rounded-[2rem] shadow-xl border border-gray-100">
+                    <h3 class="text-2xl font-serif font-bold mb-4">${p.name}</h3>
+                    <div class="text-5xl font-bold text-blue-900 mb-8">$${p.price}<span class="text-sm text-gray-400 font-normal">/AUD</span></div>
+                    <button onclick="showPage('sessions-page')" class="w-full bg-gray-900 text-white py-4 rounded-xl font-bold">Find My Photos</button>
                 </div>`).join('');
         }
 
         async function submitContactForm(e) {
-            e.preventDefault();
-            const btn = document.getElementById('contact-submit-btn');
-            const [name, email, message] = [document.getElementById('contact-name').value, document.getElementById('contact-email').value, document.getElementById('contact-message').value];
-            btn.innerText = "Sending..."; btn.disabled = true;
-            try {
-                const res = await fetch(`${SUPA_URL}/functions/v1/contact-form`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` }, body: JSON.stringify({ name, email, message }) });
-                if (res.ok) document.getElementById('contact-success').classList.replace('hidden', 'flex');
-            } catch (error) { alert("Oops! Something went wrong."); } 
-            finally { btn.innerText = "Send Message"; btn.disabled = false; }
+            e.preventDefault(); const btn = document.getElementById('contact-submit-btn');
+            const body = { name: document.getElementById('contact-name').value, email: document.getElementById('contact-email').value, message: document.getElementById('contact-message').value };
+            await fetch(`${SUPA_URL}/functions/v1/contact-form`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` }, body: JSON.stringify(body) });
+            document.getElementById('contact-success').classList.remove('hidden');
         }
 
-        function resetContactForm() { document.getElementById('contact-form').reset(); document.getElementById('contact-success').classList.replace('flex', 'hidden'); }
-
-        const privacyText = `<h3 class="font-bold text-gray-900 text-lg mb-2">1. Information We Collect</h3><p>When you purchase a photo pack from Byron Surf Clips, we collect your email address and name. This information is collected securely through our payment processor, Stripe. We do not have access to, nor do we store, your credit card details.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">2. How We Use Your Information</h3><p>Your email address is strictly used to deliver your high-resolution digital photos and provide customer support regarding your order. We do not sell, rent, or share your personal information with third parties for marketing purposes.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">3. Cookies and Tracking</h3><p>We use minimal essential cookies strictly necessary for the operation of the website (such as keeping items in your shopping cart).</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">4. Contact Us</h3><p>If you have any questions regarding your privacy, please contact us at hello@byronsurfclips.com.</p>`;
-        const termsText = `<h3 class="font-bold text-gray-900 text-lg mb-2">1. Digital Products and Refunds</h3><p>All sales on Byron Surf Clips are final. Due to the nature of digital downloads, once a purchase is completed and the high-resolution files are delivered to your email, we cannot offer refunds, returns, or exchanges for "change of mind." This policy is in compliance with Australian Consumer Law (ACL). If you experience a technical issue or receive a corrupted file, please contact us at hello@byronsurfclips.com within 7 days, and we will happily replace the file.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">2. Copyright and Usage Rights</h3><p>Byron Surf Clips retains the copyright to all images.</p><p>When you purchase a photo, you are buying a "Personal Use License." This means you are completely free to post the photos on your personal social media accounts, share them with friends, or print them for your wall.</p><p class="font-bold mt-4 text-gray-900">You may not:</p><ul class="list-disc pl-5 mt-2 space-y-2"><li>Resell the images to third parties or stock photography websites.</li><li>Use the images for commercial advertising, branding, or merchandise without prior written consent and a commercial license.</li></ul><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">3. Agreement</h3><p>By proceeding with a purchase, you agree to these Terms of Service and acknowledge our Refund Policy.</p>`;
-
         function openLegalModal(type) {
-            document.getElementById('legal-title').innerText = type === 'privacy' ? 'Privacy Policy' : 'Terms of Service & Refund Policy';
-            document.getElementById('legal-content').innerHTML = type === 'privacy' ? privacyText : termsText;
+            const content = type === 'privacy' ? `
+                <h2 class="text-3xl font-serif font-bold mb-6">Privacy Policy</h2>
+                <p class="mb-4">At Byron Surf Clips, we respect your privacy. We only collect your email to deliver your photos. We do not store your credit card information; all payments are handled securely by Stripe.</p>
+            ` : `
+                <h2 class="text-3xl font-serif font-bold mb-6">Terms & Refunds</h2>
+                <p class="mb-4">All digital sales are final. Since you receive the high-res files instantly via email, we cannot offer refunds. You have a personal license to print and share the photos, but not to resell them.</p>
+            `;
+            document.getElementById('legal-content').innerHTML = content;
             document.getElementById('legal-modal').classList.remove('hidden');
         }
         function closeLegalModal() { document.getElementById('legal-modal').classList.add('hidden'); }
 
-        loadSiteSettings(); checkUser(); checkUrlStatus(); 
+        // --- AUTH VIGILANTE & STARTUP ---
+        checkUser();
+        client.auth.onAuthStateChange((event) => { if (event === 'SIGNED_IN') checkUser(); });
+        showPage('landing-page');
     </script>
 </body>
 </html>
-
