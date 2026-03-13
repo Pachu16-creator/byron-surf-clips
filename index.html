@@ -22,7 +22,7 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
+       
         
         /* TRUCO DE CARGA SUAVE */
         html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
@@ -273,7 +273,7 @@
         <button onclick="prevPhoto()" class="absolute left-2 md:left-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
-            <div class="watermark-overlay opacity-30 pointer-events-none"></div>
+            
         </div>
         <button onclick="nextPhoto()" class="absolute right-2 md:right-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
@@ -433,7 +433,7 @@
                 return `
                 <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
-                    <div class="watermark-overlay pointer-events-none"></div>
+                    
                     <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
                     <div class="absolute top-3 left-3 z-10">
                         <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', '${safeUrlOriginal}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
@@ -539,7 +539,7 @@
                 <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
                     <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
                         <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false">
-                        <div class="watermark-overlay pointer-events-none"></div>
+                        
                     </div>
                     <div class="flex-grow">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
