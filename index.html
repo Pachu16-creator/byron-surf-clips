@@ -8,11 +8,11 @@
     <meta name="description" content="Find yourself in the waves. High-resolution surf photography from Byron Bay, Australia.">
     <meta property="og:title" content="Byron Surf Clips | Capture the Wave">
     <meta property="og:description" content="Get your high-quality surf photos from Byron Bay. Capture your best waves!">
-    <meta property="og:image" content="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg"> 
+    <meta property="og:image" content="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/logo-byron.png"> 
     <meta property="og:url" content="https://byronsurfclips.com">
     <meta property="og:type" content="website">
 
-    <link rel="icon" type="image/png" href="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png">
+    <link rel="icon" type="image/png" href="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/logo-byron.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -22,7 +22,6 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-       
         
         /* TRUCO DE CARGA SUAVE */
         html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
@@ -273,7 +272,6 @@
         <button onclick="prevPhoto()" class="absolute left-2 md:left-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
-            
         </div>
         <button onclick="nextPhoto()" class="absolute right-2 md:right-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
         <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
