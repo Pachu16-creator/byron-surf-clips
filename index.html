@@ -13,7 +13,15 @@
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .watermark-overlay { position: absolute; inset: 0; background-image: url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/watermark.png'); background-size: contain; background-repeat: no-repeat; background-position: center; opacity: 0.2; pointer-events: none; }
+        
+        /* TRUCO DE CARGA: Oculta la web hasta que esté lista y le da un fundido elegante */
+        html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
+        html.ready { visibility: visible; opacity: 1; }
     </style>
+    <script>
+        // Muestra la web de forma suave en cuanto Tailwind y el contenido base cargan
+        window.addEventListener('DOMContentLoaded', () => { setTimeout(() => document.documentElement.classList.add('ready'), 150); });
+    </script>
 </head>
 <body class="bg-gray-50 min-h-screen flex flex-col relative text-gray-900">
 
@@ -102,13 +110,22 @@
                     <h2 id="gallery-header" class="text-4xl font-serif font-bold text-gray-900"></h2>
                     <div class="flex items-center gap-4">
                         <span id="gallery-price-tag" class="bg-blue-50 text-blue-800 px-4 py-2 rounded-full font-bold text-sm shadow-sm"></span>
-                        <div id="admin-upload-area" class="hidden">
-                            <input type="file" id="bulk-files" multiple class="hidden" onchange="handleBulkUpload(event)">
-                            <label for="bulk-files" class="bg-blue-600 text-white px-6 py-2 rounded-full font-bold cursor-pointer hover:bg-blue-700 transition shadow-md">UPLOAD PHOTOS</label>
+                        
+                        <div id="admin-upload-area" class="hidden flex-col gap-2 items-end">
+                            <div class="flex gap-2">
+                                <input type="file" id="web-files" multiple class="hidden" onchange="handleWebFiles(event)">
+                                <label for="web-files" id="lbl-web" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 shadow-sm transition">1. Web Photos</label>
+
+                                <input type="file" id="orig-files" multiple class="hidden" onchange="handleOrigFiles(event)">
+                                <label for="orig-files" id="lbl-orig" class="bg-gray-100 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg text-xs font-bold cursor-pointer hover:bg-gray-200 shadow-sm transition">2. High-Res</label>
+                            </div>
+                            <button id="start-upload-btn" onclick="startDualUpload()" class="hidden bg-blue-600 text-white px-6 py-2 rounded-lg text-xs font-bold hover:bg-blue-700 transition w-full shadow-md text-center">3. START UPLOAD</button>
                         </div>
+
                     </div>
                 </div>
                 <div id="upload-progress-container" class="hidden mb-8 max-w-md">
+                    <p class="text-[10px] text-blue-600 font-bold uppercase tracking-widest mb-1" id="upload-status-text">Uploading and matching files...</p>
                     <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                         <div id="progress-bar" class="bg-blue-600 h-full transition-all duration-300" style="width: 0%"></div>
                     </div>
@@ -160,9 +177,13 @@
 
     <footer class="bg-[#0a1120] text-white py-16 px-8 mt-auto">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
+            <div class="text-center md:text-left">
                 <h2 class="font-serif text-2xl font-bold mb-1">Byron Surf Clips</h2>
                 <p class="text-gray-400 text-xs">Capturing waves, one frame at a time.</p>
+                <div class="flex gap-4 justify-center md:justify-start mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-500">
+                    <button onclick="openLegalModal('privacy')" class="hover:text-white transition">Privacy Policy</button>
+                    <button onclick="openLegalModal('terms')" class="hover:text-white transition">Terms of Service</button>
+                </div>
             </div>
             <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest text-gray-400">
                 <button onclick="showPage('sessions-page')" class="hover:text-white transition">Find My Shot</button>
@@ -214,6 +235,16 @@
         </div>
     </div>
 
+    <div id="legal-modal" class="hidden fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-[2rem] w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl relative">
+            <button onclick="closeLegalModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black text-2xl z-10">✕</button>
+            <div class="p-8 pb-6 border-b border-gray-100">
+                <h2 id="legal-title" class="text-3xl font-serif font-bold text-gray-900"></h2>
+            </div>
+            <div id="legal-content" class="p-8 overflow-y-auto text-sm text-gray-600 space-y-4 no-scrollbar"></div>
+        </div>
+    </div>
+
     <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
         <button onclick="prevPhoto()" class="absolute left-6 text-white text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
@@ -231,6 +262,10 @@
         
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0;
         let isAdmin = false, currentSessionId = null, currentPrice = 20;
+
+        // Variables para la Subida Doble
+        let webUploads = [];
+        let origUploads = [];
 
         function showPage(pageId) {
             ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'success-page', 'cancel-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -252,18 +287,13 @@
 
         function checkUrlStatus() {
             const urlParams = new URLSearchParams(window.location.search);
-            const status = urlParams.get('status');
-            
-            if (status === 'success') {
+            if (urlParams.get('status') === 'success') {
                 showPage('success-page');
-                cart = []; 
-                updateCartUI();
+                cart = []; updateCartUI();
                 window.history.replaceState({}, document.title, window.location.pathname);
-            } else if (status === 'cancel') {
+            } else if (urlParams.get('status') === 'cancel') {
                 showPage('cancel-page');
                 window.history.replaceState({}, document.title, window.location.pathname);
-            } else {
-                showPage('landing-page');
             }
         }
 
@@ -279,10 +309,8 @@
             if (!file) return;
             const { error, data } = await client.storage.from('clips').upload(`hero/${Date.now()}-${file.name.replace(/\s+/g, '_')}`, file);
             if (!error) {
-                const url = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-                await client.from('site_settings').upsert({ id: 'main', hero_bg_url: url });
-                alert("Hero background updated!");
-                location.reload();
+                await client.from('site_settings').upsert({ id: 'main', hero_bg_url: `${SUPA_URL}/storage/v1/object/public/clips/${data.path}` });
+                alert("Hero background updated!"); location.reload();
             }
         }
 
@@ -298,51 +326,32 @@
         
         async function login() {
             const email = document.getElementById('login-email').value;
-            if(!email) return alert("Please enter an email first.");
-            
-            const btn = document.getElementById('login-btn');
-            btn.innerText = "Sending...";
-            btn.disabled = true;
-            
-            const { error } = await client.auth.signInWithOtp({ 
-                email, 
-                options: { emailRedirectTo: window.location.origin } 
-            });
-            
-            btn.innerText = "Send Magic Link";
-            btn.disabled = false;
-            
-            if (!error) {
-                alert("Magic link sent! Check your inbox.");
-                document.getElementById('auth-modal').classList.add('hidden');
-                document.getElementById('login-email').value = '';
-            } else {
-                alert("Error: " + error.message);
-            }
+            if(!email) return;
+            document.getElementById('login-btn').innerText = "Sending...";
+            const { error } = await client.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin } });
+            document.getElementById('login-btn').innerText = "Send Magic Link";
+            if (!error) { alert("Magic link sent!"); document.getElementById('auth-modal').classList.add('hidden'); }
         }
         
         async function logout() { await client.auth.signOut(); location.reload(); }
 
         async function loadSessions() {
             const { data } = await client.from('sessions').select('*').order('date', { ascending: false });
-            sessions = data || [];
-            renderSessions(sessions);
+            sessions = data || []; renderSessions(sessions);
         }
 
         function renderSessions(list) {
             document.getElementById('sessions-grid').innerHTML = list.map(s => `
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden cursor-pointer hover:shadow-xl transition-all" onclick="openGallery('${s.id}', '${s.location}', ${s.price || 20})">
-                    <div class="relative h-56 w-full">
-                        <img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-full object-cover">
-                    </div>
+                    <div class="relative h-56 w-full"><img src="${s.cover_url || 'https://images.unsplash.com/photo-1502680390469-be75c86b636f'}" class="w-full h-full object-cover"></div>
                     <div class="p-5">
                         <h3 class="font-serif font-bold text-2xl text-gray-900 mb-4">${s.location}</h3>
                         <div class="flex flex-wrap gap-2 text-[10px] text-gray-600 font-bold uppercase tracking-wider">
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> ${s.location}</span>
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> ${s.date || 'Recent'}</span>
-                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg> ${s.time_range || 'Morning'}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">📍 ${s.location}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">📅 ${s.date || 'Recent'}</span>
+                            <span class="bg-gray-100 px-2 py-1 rounded flex items-center gap-1">⏱️ ${s.time_range || 'Morning'}</span>
                         </div>
-                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 hover:text-white transition">Delete Session</button>` : ''}
+                        ${isAdmin ? `<button onclick="event.stopPropagation(); deleteSession('${s.id}')" class="mt-4 w-full bg-red-50 text-red-500 py-2 rounded-lg text-[10px] font-bold hover:bg-red-500 transition">Delete Session</button>` : ''}
                     </div>
                 </div>`).join('');
         }
@@ -359,54 +368,36 @@
             const time_range = document.getElementById('new-time').value;
             const date = document.getElementById('new-date').value;
             const price = parseFloat(document.getElementById('new-price').value) || 20; 
-            
-            if(!location) return alert("Location is required.");
-
+            if(!location) return;
             const { error } = await client.from('sessions').insert([{ location, time_range, date, price }]);
-            if (!error) { 
-                alert("Session published!"); 
-                document.getElementById('new-loc').value = '';
-                loadSessions(); 
-            } else {
-                alert("Error: " + error.message);
-            }
+            if (!error) { document.getElementById('new-loc').value = ''; loadSessions(); }
         }
 
-        async function deleteSession(id) {
-            if (confirm("Are you sure you want to delete this session?")) {
-                await client.from('sessions').delete().eq('id', id);
-                loadSessions();
-            }
-        }
+        async function deleteSession(id) { if (confirm("Are you sure?")) { await client.from('sessions').delete().eq('id', id); loadSessions(); } }
 
         async function openGallery(id, title, price) {
-            currentSessionId = id; 
-            currentPrice = price || 20;
+            currentSessionId = id; currentPrice = price || 20;
             document.getElementById('sessions-grid-container').classList.add('hidden');
             document.getElementById('view-gallery').classList.remove('hidden');
             document.getElementById('gallery-header').innerText = title;
             document.getElementById('gallery-price-tag').innerText = `$${currentPrice} AUD / Photo`;
-            
-            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden');
+            if(isAdmin) document.getElementById('admin-upload-area').classList.remove('hidden', 'flex-col');
+            if(isAdmin) document.getElementById('admin-upload-area').classList.add('flex-col'); // Fix display
             loadPhotos();
         }
 
-        function showSessions() { 
-            document.getElementById('view-gallery').classList.add('hidden'); 
-            document.getElementById('sessions-grid-container').classList.remove('hidden'); 
-        }
+        function showSessions() { document.getElementById('view-gallery').classList.add('hidden'); document.getElementById('sessions-grid-container').classList.remove('hidden'); }
 
         async function loadPhotos() {
             const { data } = await client.from('photos').select('*').eq('session_id', currentSessionId);
             currentPhotos = data || [];
-            
             document.getElementById('photos-grid').innerHTML = currentPhotos.map((p, i) => `
                 <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
                     <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
                     <div class="watermark-overlay pointer-events-none"></div>
                     <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
                     <div class="absolute top-3 left-3 z-10">
-                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
+                        <input type="checkbox" class="w-5 h-5 cursor-pointer accent-blue-600 shadow-md" onchange="toggleCart('${p.url_watermarked}', '${p.url_original}', this)" ${cart.some(c => c.url === p.url_watermarked) ? 'checked' : ''}>
                     </div>
                     ${isAdmin ? `
                         <button onclick="setAsCover('${p.url_watermarked}')" class="absolute bottom-2 left-2 bg-white/90 text-gray-900 px-2 py-1 rounded text-[10px] font-bold shadow z-10 hover:bg-black hover:text-white transition">★ Set Cover</button>
@@ -415,50 +406,77 @@
                 </div>`).join('');
         }
 
-        async function setAsCover(url) {
-            await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId);
-            alert("Cover updated for this session!");
+        async function setAsCover(url) { await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId); alert("Cover updated!"); }
+        async function deletePhoto(id) { if(confirm("Delete?")) { await client.from('photos').delete().eq('id', id); loadPhotos(); } }
+
+        // --- SISTEMA DOBLE DE SUBIDA ---
+        function handleWebFiles(e) { 
+            webUploads = Array.from(e.target.files); 
+            document.getElementById('lbl-web').innerText = `✓ ${webUploads.length} Web`;
+            document.getElementById('lbl-web').classList.replace('bg-gray-100', 'bg-green-100');
+            checkUploadReady(); 
+        }
+        function handleOrigFiles(e) { 
+            origUploads = Array.from(e.target.files); 
+            document.getElementById('lbl-orig').innerText = `✓ ${origUploads.length} High-Res`;
+            document.getElementById('lbl-orig').classList.replace('bg-gray-100', 'bg-green-100');
+            checkUploadReady(); 
+        }
+        function checkUploadReady() {
+            if(webUploads.length > 0 && origUploads.length > 0) { document.getElementById('start-upload-btn').classList.remove('hidden'); }
         }
 
-        async function deletePhoto(id) {
-            if(confirm("Delete this photo?")) {
-                await client.from('photos').delete().eq('id', id);
-                loadPhotos();
+        async function startDualUpload() {
+            if(webUploads.length !== origUploads.length) {
+                if(!confirm(`Warning: You selected ${webUploads.length} Web photos and ${origUploads.length} High-Res photos. They should be equal. Continue?`)) return;
             }
-        }
 
-        async function handleBulkUpload(event) {
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
-            
             const container = document.getElementById('upload-progress-container');
             const progressBar = document.getElementById('progress-bar');
             container.classList.remove('hidden');
             let uploadedCount = 0;
+            const totalFiles = webUploads.length;
 
-            for (const file of files) {
-                const fName = `watermarked/${Date.now()}-${file.name.replace(/\s+/g, '_')}`;
-                const { error, data } = await client.storage.from('clips').upload(fName, file);
+            // Ordenar alfabéticamente para emparejarlas
+            webUploads.sort((a,b) => a.name.localeCompare(b.name));
+            origUploads.sort((a,b) => a.name.localeCompare(b.name));
+
+            for (let i = 0; i < totalFiles; i++) {
+                const webFile = webUploads[i];
+                const origFile = origUploads[i] || webFile; // Por si hay un error y falta una
+
+                const timestamp = Date.now();
+                const safeName = webFile.name.replace(/\s+/g, '_');
                 
-                if (!error) {
-                    const url = `${SUPA_URL}/storage/v1/object/public/clips/${data.path}`;
-                    await client.from('photos').insert([{ session_id: currentSessionId, url_watermarked: url, url_original: url }]);
+                // Subir Web Ligeras
+                const { error: errWeb, data: dataWeb } = await client.storage.from('clips').upload(`watermarked/${timestamp}-web-${safeName}`, webFile);
+                // Subir Originales Pesadas
+                const { error: errOrig, data: dataOrig } = await client.storage.from('clips').upload(`originals/${timestamp}-orig-${safeName}`, origFile);
+                
+                if (!errWeb && !errOrig) {
+                    await client.from('photos').insert([{ 
+                        session_id: currentSessionId, 
+                        url_watermarked: `${SUPA_URL}/storage/v1/object/public/clips/${dataWeb.path}`, 
+                        url_original: `${SUPA_URL}/storage/v1/object/public/clips/${dataOrig.path}` 
+                    }]);
                 }
-                
                 uploadedCount++;
-                progressBar.style.width = `${Math.round((uploadedCount / files.length) * 100)}%`;
+                progressBar.style.width = `${Math.round((uploadedCount / totalFiles) * 100)}%`;
             }
             
             setTimeout(() => { 
-                container.classList.add('hidden'); 
-                progressBar.style.width = '0%'; 
+                container.classList.add('hidden'); progressBar.style.width = '0%'; 
+                webUploads = []; origUploads = [];
+                document.getElementById('lbl-web').innerText = '1. Web Photos'; document.getElementById('lbl-web').classList.replace('bg-green-100', 'bg-gray-100');
+                document.getElementById('lbl-orig').innerText = '2. High-Res'; document.getElementById('lbl-orig').classList.replace('bg-green-100', 'bg-gray-100');
+                document.getElementById('start-upload-btn').classList.add('hidden');
                 loadPhotos(); 
             }, 1000);
         }
 
-        function toggleCart(url, el) {
-            if(el.checked) cart.push({url, price: currentPrice}); 
-            else cart = cart.filter(c => c.url !== url);
+        function toggleCart(urlWeb, urlOrig, el) {
+            if(el.checked) cart.push({url: urlWeb, url_orig: urlOrig, price: currentPrice}); 
+            else cart = cart.filter(c => c.url !== urlWeb);
             updateCartUI();
         }
 
@@ -466,7 +484,6 @@
 
         function updateCartUI() {
             document.getElementById('cart-count').innerText = cart.length;
-            
             document.getElementById('cart-items').innerHTML = cart.map(c => `
                 <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
                     <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
@@ -477,79 +494,48 @@
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
                         <p class="font-bold text-gray-900">$${c.price} AUD</p>
                     </div>
-                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2 transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-width="1.5"></path></svg></button>
+                    <button onclick="removeFromCart('${c.url}')" class="text-gray-300 hover:text-red-500 mr-2 transition">✕</button>
                 </div>`).join('');
 
             const subtotal = cart.reduce((a, b) => a + b.price, 0);
-            let finalAmount = subtotal;
-            let discount = 0;
-            let discountName = "";
+            let finalAmount = subtotal, discount = 0, discountName = "";
 
-            if (cart.length >= 10) {
-                discountName = "Full Collection";
-                finalAmount = 150 + ((cart.length - 10) * (cart[0]?.price || 20)); 
-            } else if (cart.length >= 5) {
-                discountName = "Session Pack";
-                finalAmount = 90 + ((cart.length - 5) * (cart[0]?.price || 20));
-            } else if (cart.length >= 2) {
-                discountName = "Starter Pack";
-                finalAmount = 30 + ((cart.length - 2) * (cart[0]?.price || 20));
-            }
+            if (cart.length >= 10) { discountName = "Full Collection"; finalAmount = 150 + ((cart.length - 10) * (cart[0]?.price || 20)); } 
+            else if (cart.length >= 5) { discountName = "Session Pack"; finalAmount = 90 + ((cart.length - 5) * (cart[0]?.price || 20)); } 
+            else if (cart.length >= 2) { discountName = "Starter Pack"; finalAmount = 30 + ((cart.length - 2) * (cart[0]?.price || 20)); }
 
             if (finalAmount < subtotal) {
                 discount = subtotal - finalAmount;
                 document.getElementById('pack-discount-row').classList.remove('hidden');
                 document.getElementById('pack-name').innerText = `Pack Discount (${discountName})`;
-            } else {
-                document.getElementById('pack-discount-row').classList.add('hidden');
-            }
+            } else { document.getElementById('pack-discount-row').classList.add('hidden'); }
 
             document.getElementById('cart-qty').innerText = cart.length;
             document.getElementById('cart-subtotal').innerText = `$${subtotal} AUD`;
             document.getElementById('cart-discount').innerText = `-$${discount} AUD`;
             document.getElementById('cart-total').innerText = `$${finalAmount} AUD`;
             document.getElementById('pay-btn-amt').innerText = `$${finalAmount} AUD`;
-            
             window.currentFinalPrice = finalAmount;
         }
 
-        function removeFromCart(url) {
-            cart = cart.filter(c => c.url !== url);
-            updateCartUI();
-            if(currentSessionId) loadPhotos(); 
-        }
+        function removeFromCart(url) { cart = cart.filter(c => c.url !== url); updateCartUI(); if(currentSessionId) loadPhotos(); }
 
         async function checkout() {
             if(!cart.length) return alert("Your cart is empty.");
-            
             const btn = document.getElementById('checkout-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "REDIRECTING TO SECURE PAYMENT...";
-            btn.disabled = true;
-            
+            btn.innerHTML = "REDIRECTING..."; btn.disabled = true;
             try {
-                const cartUrls = cart.map(c => c.url);
+                // AHORA MANDAMOS LA URL ORIGINAL (PESADA) A STRIPE PARA QUE RESEND LA ENVIE
+                const cartUrls = cart.map(c => c.url_orig);
                 const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
-                    body: JSON.stringify({ 
-                        photos: cartUrls,
-                        amount: window.currentFinalPrice
-                    })
+                    body: JSON.stringify({ photos: cartUrls, amount: window.currentFinalPrice })
                 });
-
                 const data = await res.json();
-                if (data && data.url) {
-                    window.location.href = data.url; 
-                } else {
-                    throw new Error(data.error || "No Stripe session returned");
-                }
-
-            } catch (error) {
-                alert("Checkout Error: " + error.message);
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
+                if (data && data.url) window.location.href = data.url; 
+                else throw new Error("No Stripe session returned");
+            } catch (error) { alert("Error: " + error.message); btn.innerHTML = "Pay"; btn.disabled = false; }
         }
 
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
@@ -569,46 +555,31 @@
                 </div>`).join('');
         }
 
-        // --- NUEVAS FUNCIONES DEL FORMULARIO DE CONTACTO ---
         async function submitContactForm(e) {
             e.preventDefault();
             const btn = document.getElementById('contact-submit-btn');
-            const name = document.getElementById('contact-name').value;
-            const email = document.getElementById('contact-email').value;
-            const message = document.getElementById('contact-message').value;
-
-            btn.innerText = "Sending...";
-            btn.disabled = true;
-
+            const [name, email, message] = [document.getElementById('contact-name').value, document.getElementById('contact-email').value, document.getElementById('contact-message').value];
+            btn.innerText = "Sending..."; btn.disabled = true;
             try {
-                const res = await fetch(`${SUPA_URL}/functions/v1/contact-form`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` },
-                    body: JSON.stringify({ name, email, message })
-                });
-
-                if (res.ok) {
-                    document.getElementById('contact-success').classList.replace('hidden', 'flex');
-                } else {
-                    throw new Error("Error sending message");
-                }
-            } catch (error) {
-                alert("Oops! Something went wrong. Please try again.");
-            } finally {
-                btn.innerText = "Send Message";
-                btn.disabled = false;
-            }
+                const res = await fetch(`${SUPA_URL}/functions/v1/contact-form`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SUPA_KEY}` }, body: JSON.stringify({ name, email, message }) });
+                if (res.ok) document.getElementById('contact-success').classList.replace('hidden', 'flex');
+            } catch (error) { alert("Oops! Something went wrong."); } 
+            finally { btn.innerText = "Send Message"; btn.disabled = false; }
         }
 
-        function resetContactForm() {
-            document.getElementById('contact-form').reset();
-            document.getElementById('contact-success').classList.replace('flex', 'hidden');
-        }
+        function resetContactForm() { document.getElementById('contact-form').reset(); document.getElementById('contact-success').classList.replace('flex', 'hidden'); }
 
-        // --- INICIALIZACIÓN ---
-        loadSiteSettings();
-        checkUser();
-        checkUrlStatus(); 
+        const privacyText = `<h3 class="font-bold text-gray-900 text-lg mb-2">1. Information We Collect</h3><p>When you purchase a photo pack from Byron Surf Clips, we collect your email address and name. This information is collected securely through our payment processor, Stripe. We do not have access to, nor do we store, your credit card details.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">2. How We Use Your Information</h3><p>Your email address is strictly used to deliver your high-resolution digital photos and provide customer support regarding your order. We do not sell, rent, or share your personal information with third parties for marketing purposes.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">3. Cookies and Tracking</h3><p>We use minimal essential cookies strictly necessary for the operation of the website (such as keeping items in your shopping cart).</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">4. Contact Us</h3><p>If you have any questions regarding your privacy, please contact us at hello@byronsurfclips.com.</p>`;
+        const termsText = `<h3 class="font-bold text-gray-900 text-lg mb-2">1. Digital Products and Refunds</h3><p>All sales on Byron Surf Clips are final. Due to the nature of digital downloads, once a purchase is completed and the high-resolution files are delivered to your email, we cannot offer refunds, returns, or exchanges for "change of mind." This policy is in compliance with Australian Consumer Law (ACL). If you experience a technical issue or receive a corrupted file, please contact us at hello@byronsurfclips.com within 7 days, and we will happily replace the file.</p><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">2. Copyright and Usage Rights</h3><p>Byron Surf Clips retains the copyright to all images.</p><p>When you purchase a photo, you are buying a "Personal Use License." This means you are completely free to post the photos on your personal social media accounts, share them with friends, or print them for your wall.</p><p class="font-bold mt-4 text-gray-900">You may not:</p><ul class="list-disc pl-5 mt-2 space-y-2"><li>Resell the images to third parties or stock photography websites.</li><li>Use the images for commercial advertising, branding, or merchandise without prior written consent and a commercial license.</li></ul><h3 class="font-bold text-gray-900 text-lg mt-6 mb-2">3. Agreement</h3><p>By proceeding with a purchase, you agree to these Terms of Service and acknowledge our Refund Policy.</p>`;
+
+        function openLegalModal(type) {
+            document.getElementById('legal-title').innerText = type === 'privacy' ? 'Privacy Policy' : 'Terms of Service & Refund Policy';
+            document.getElementById('legal-content').innerHTML = type === 'privacy' ? privacyText : termsText;
+            document.getElementById('legal-modal').classList.remove('hidden');
+        }
+        function closeLegalModal() { document.getElementById('legal-modal').classList.add('hidden'); }
+
+        loadSiteSettings(); checkUser(); checkUrlStatus(); 
     </script>
 </body>
 </html>
