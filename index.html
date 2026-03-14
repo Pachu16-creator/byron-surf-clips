@@ -34,7 +34,10 @@
 <body class="bg-gray-50 min-h-screen flex flex-col relative text-gray-900">
 
     <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-50 text-white" id="main-nav">
-        <h1 class="font-serif font-bold text-2xl tracking-tighter cursor-pointer hover:opacity-80 transition" onclick="showPage('landing-page')">Byron Surf Clips</h1>
+        <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition" onclick="showPage('landing-page')">
+    <img src="https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/logo-byron.png" alt="Logo" class="w-9 h-9 md:w-10 md:h-10 rounded-full shadow-sm">
+    <h1 class="font-serif font-bold text-xl md:text-2xl tracking-tighter">Byron Surf Clips</h1>
+</div>
         
         <div class="flex items-center gap-3 md:gap-4">
             <button onclick="toggleCartModal()" class="flex items-center gap-2 bg-[#1e608d] text-white px-4 py-2 rounded-full hover:bg-[#154b70] transition shadow-lg mr-2 md:mr-0" title="Open Cart">
