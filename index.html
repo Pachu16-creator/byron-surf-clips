@@ -24,8 +24,6 @@
         .font-serif { font-family: 'Playfair Display', serif; }
         .hero-bg { background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('https://gmyptbfrpspzmyucqumz.supabase.co/storage/v1/object/public/clips/hero-default.jpg'); background-size: cover; background-position: center; transition: background-image 0.5s ease; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        
-        /* TRUCO DE CARGA SUAVE */
         html { visibility: hidden; opacity: 0; transition: opacity 0.5s ease; }
         html.ready { visibility: visible; opacity: 1; }
     </style>
@@ -38,10 +36,13 @@
     <nav class="w-full p-6 flex justify-between items-center max-w-7xl mx-auto absolute top-0 left-0 right-0 z-50 text-white" id="main-nav">
         <h1 class="font-serif font-bold text-2xl tracking-tighter cursor-pointer hover:opacity-80 transition" onclick="showPage('landing-page')">Byron Surf Clips</h1>
         
-        <div class="flex items-center gap-4">
-            <button onclick="toggleCartModal()" class="relative mr-2 md:mr-0" title="Open Cart">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5"></path></svg>
-                <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">0</span>
+        <div class="flex items-center gap-3 md:gap-4">
+            <button onclick="toggleCartModal()" class="flex items-center gap-2 bg-[#1e608d] text-white px-4 py-2 rounded-full hover:bg-[#154b70] transition shadow-lg mr-2 md:mr-0" title="Open Cart">
+                <span class="text-xs font-bold uppercase tracking-widest hidden sm:block">Cart</span>
+                <div class="relative">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke-width="1.5"></path></svg>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-white text-black text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center shadow-md">0</span>
+                </div>
             </button>
 
             <button class="md:hidden block" onclick="toggleMobileMenu()">
@@ -52,7 +53,6 @@
                 <button onclick="showPage('sessions-page')" class="hover:text-blue-300 transition">Find My Shot</button>
                 <button onclick="showPage('packs-page')" class="hover:text-blue-300 transition">Packs</button>
                 <button onclick="showPage('contact-page')" class="hover:text-blue-300 transition">Contact</button>
-                
                 <button onclick="document.getElementById('auth-modal').classList.remove('hidden')" title="Admin Login" class="ml-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-width="1.5"></path></svg>
                 </button>
@@ -241,7 +241,7 @@
         <div class="bg-white w-full max-w-md h-full p-6 md:p-8 overflow-y-auto flex flex-col shadow-2xl">
             <div class="flex justify-between items-center mb-8">
                 <h2 class="text-3xl font-serif font-bold">Your Cart</h2>
-                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black text-2xl">✕</button>
+                <button onclick="toggleCartModal()" class="text-gray-400 hover:text-black transition text-2xl">✕</button>
             </div>
             <div id="cart-items" class="flex-grow space-y-4 overflow-y-auto pr-2 no-scrollbar"></div>
             
@@ -258,11 +258,24 @@
                     <span>Total</span>
                     <span id="cart-total" class="text-3xl font-serif">$0 AUD</span>
                 </div>
-                <button id="checkout-btn" onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl hover:bg-[#154b70] transition shadow-lg flex justify-center gap-2 items-center">
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4zM18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM5 12a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2h3a1 1 0 100-2h-3z"></path></svg>
-                    Pay <span id="pay-btn-amt">$0 AUD</span>
+                
+                <button id="checkout-btn" onclick="checkout()" class="w-full bg-[#1e608d] text-white font-bold py-4 rounded-xl shadow-lg flex justify-center items-center gap-3 hover:bg-[#154b70] transition">
+                    <span id="btn-text">PAY <span id="pay-btn-amt">$0 AUD</span></span>
+                    <svg id="btn-spinner" class="animate-spin hidden w-5 h-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
                 </button>
-                <p class="text-center text-[10px] text-gray-400 mt-4 uppercase tracking-widest">🔒 Secure checkout</p>
+                
+                <div class="mt-4 flex flex-col items-center gap-3">
+                    <p class="text-[10px] text-gray-500 uppercase tracking-widest text-center">🔒 You will be securely redirected to Stripe</p>
+                    <div class="flex gap-2 opacity-60 items-center justify-center">
+                        <span class="text-xs font-bold border border-gray-300 px-2 py-1 rounded">Visa</span>
+                        <span class="text-xs font-bold border border-gray-300 px-2 py-1 rounded">Mastercard</span>
+                        <span class="text-xs font-bold border border-gray-300 px-2 py-1 rounded">Apple Pay</span>
+                        <span class="text-xs font-bold border border-gray-300 px-2 py-1 rounded">G Pay</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -278,12 +291,10 @@
     </div>
 
     <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
-        
         <div class="absolute top-6 left-6 md:left-10 z-[70] bg-black/60 backdrop-blur-md p-3 md:p-4 rounded-xl border border-white/20 flex items-center gap-3">
             <input type="checkbox" id="lightbox-checkbox" class="w-6 h-6 md:w-7 md:h-7 cursor-pointer accent-blue-600 shadow-lg" onchange="toggleCartFromLightbox()">
             <label for="lightbox-checkbox" class="text-white font-bold text-sm md:text-base cursor-pointer select-none">Add to Cart</label>
         </div>
-
         <button onclick="prevPhoto()" class="absolute left-2 md:left-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
@@ -542,13 +553,11 @@
             updateCartUI();
         }
 
-        /* LÓGICA DEL CHECKBOX EN EL LIGHTBOX */
         function toggleCartFromLightbox() {
             const p = currentPhotos[currentIndex];
             const isChecked = document.getElementById('lightbox-checkbox').checked;
             
             if (isChecked) {
-                // Previene duplicados si se hace clic rápido
                 if(!cart.some(c => c.url === p.url_watermarked)) {
                     cart.push({url: p.url_watermarked, url_orig: p.url_original || p.url_watermarked, price: currentPrice});
                 }
@@ -557,7 +566,7 @@
             }
             
             updateCartUI();
-            loadPhotos(); // Refresca la cuadrícula de fondo para que el check también aparezca ahí
+            loadPhotos(); 
         }
 
         function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
@@ -602,7 +611,6 @@
             updateCartUI(); 
             if(currentSessionId) loadPhotos(); 
 
-            // Actualizar checkbox del lightbox si está abierto y es la misma foto
             if(!document.getElementById('lightbox').classList.contains('hidden') && currentPhotos[currentIndex].url_watermarked === url) {
                 document.getElementById('lightbox-checkbox').checked = false;
             }
@@ -610,9 +618,15 @@
 
         async function checkout() {
             if(!cart.length) return alert("Your cart is empty.");
+            
             const btn = document.getElementById('checkout-btn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = "REDIRECTING..."; btn.disabled = true;
+            const btnText = document.getElementById('btn-text');
+            const spinner = document.getElementById('btn-spinner');
+            
+            btn.disabled = true;
+            btnText.innerText = "Processing secure payment...";
+            spinner.classList.remove('hidden');
+
             try {
                 const cartUrls = cart.map(c => c.url_orig || c.url);
                 const res = await fetch(`${SUPA_URL}/functions/v1/swift-api`, {
@@ -624,17 +638,15 @@
                 if (data && data.url) window.location.href = data.url; 
                 else throw new Error(data.error || "No Stripe session returned");
             } catch (error) { 
-                alert("Error: " + error.message); 
-                btn.innerHTML = originalText; 
-                btn.disabled = false; 
+                alert("Payment gateway error. Please try again.");
+                btnText.innerHTML = `PAY <span id="pay-btn-amt">$${window.currentFinalPrice} AUD</span>`;
+                spinner.classList.add('hidden');
+                btn.disabled = false;
             }
         }
 
-        /* LÓGICA DE ACTUALIZACIÓN VISUAL DEL LIGHTBOX */
         function updateLightbox() {
             document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; 
-            
-            // Revisa si la foto actual está en el carrito para marcar/desmarcar el checkbox
             const isSelected = cart.some(c => c.url === currentPhotos[currentIndex].url_watermarked);
             document.getElementById('lightbox-checkbox').checked = isSelected;
         }
