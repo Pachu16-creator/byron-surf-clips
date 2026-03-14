@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta name="google-site-verification" content="RPi_zaY0RF1e4cFxXqIrHhwAreK0UmJnAlvGitUnb-I" />
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Byron Surf Clips | Capture the Wave</title>
+
+    <meta name="google-site-verification" content="RPi_zaY0RF1e4cFxXqIrHhwAreK0UmJnAlvGitUnb-I" />
 
     <meta name="description" content="Find yourself in the waves. High-resolution surf photography from Byron Bay, Australia.">
     <meta property="og:title" content="Byron Surf Clips | Capture the Wave">
@@ -121,11 +122,18 @@
 
             <div id="sessions-grid-container">
                 <h2 class="font-serif text-5xl font-bold mb-4">Find My Shot</h2>
-                <p class="text-gray-500 mb-8">Browse recent sessions and find yourself in the waves.</p>
-                <section class="bg-white p-2 rounded-2xl shadow-sm mb-10 flex gap-4 flex-wrap items-center border border-gray-100 w-fit">
-                    <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-transparent p-2 px-4 rounded-xl outline-none" onkeyup="filterSessions()">
-                    <input type="date" id="filter-date" class="bg-transparent p-2 px-4 rounded-xl border-l outline-none" onchange="filterSessions()">
-                </section>
+                
+                <div class="bg-blue-50 border border-blue-100 p-5 rounded-2xl mb-8 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center text-sm font-medium text-blue-900 shadow-sm">
+                    <div class="flex items-center gap-3"><span class="bg-blue-600 text-white w-7 h-7 rounded-full flex justify-center items-center text-xs font-bold shrink-0 shadow-sm">1</span> Select your session</div>
+                    <div class="flex items-center gap-3"><span class="bg-blue-600 text-white w-7 h-7 rounded-full flex justify-center items-center text-xs font-bold shrink-0 shadow-sm">2</span> Choose your best waves</div>
+                    <div class="flex items-center gap-3"><span class="bg-emerald-500 text-white w-7 h-7 rounded-full flex justify-center items-center text-xs font-bold shrink-0 shadow-sm">%</span> Pack discounts apply automatically!</div>
+                </div>
+
+                <div class="bg-white p-2 md:p-3 rounded-2xl shadow-sm mb-10 flex flex-col sm:flex-row gap-2 sm:gap-4 border border-gray-100 w-full sm:w-max">
+                    <input type="text" id="filter-loc" placeholder="Filter by location..." class="bg-gray-50 sm:bg-transparent p-3 sm:p-2 px-4 rounded-xl outline-none w-full focus:ring-2 focus:ring-blue-100 transition" onkeyup="filterSessions()">
+                    <input type="date" id="filter-date" class="bg-gray-50 sm:bg-transparent p-3 sm:p-2 px-4 rounded-xl sm:border-l border-gray-200 outline-none w-full text-gray-500 focus:ring-2 focus:ring-blue-100 transition" onchange="filterSessions()">
+                </div>
+
                 <div id="sessions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
             </div>
             
@@ -163,7 +171,7 @@
             <p class="text-gray-500 text-center mb-12">Have a question about your photos or want to book a private session? We'd love to hear from you!</p>
             
             <div class="bg-white p-8 md:p-12 rounded-[2rem] shadow-xl w-full border border-gray-100 relative">
-                <div id="contact-success" class="hidden absolute inset-0 bg-white rounded-[2rem] flex-col items-center justify-center text-center p-8 z-10">
+                <div id="contact-success" class="hidden absolute inset-0 bg-white rounded-[2rem] flex flex-col items-center justify-center text-center p-8 z-10">
                     <div class="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                         <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
                     </div>
@@ -270,12 +278,18 @@
     </div>
 
     <div id="lightbox" class="hidden fixed inset-0 z-[60] bg-black/95 flex items-center justify-center p-4">
+        
+        <div class="absolute top-6 left-6 md:left-10 z-[70] bg-black/60 backdrop-blur-md p-3 md:p-4 rounded-xl border border-white/20 flex items-center gap-3">
+            <input type="checkbox" id="lightbox-checkbox" class="w-6 h-6 md:w-7 md:h-7 cursor-pointer accent-blue-600 shadow-lg" onchange="toggleCartFromLightbox()">
+            <label for="lightbox-checkbox" class="text-white font-bold text-sm md:text-base cursor-pointer select-none">Add to Cart</label>
+        </div>
+
         <button onclick="prevPhoto()" class="absolute left-2 md:left-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❮</button>
         <div class="relative max-w-5xl w-full flex justify-center select-none" oncontextmenu="return false;">
             <img id="lightbox-img" class="max-w-full max-h-[85vh] rounded-xl shadow-2xl border border-white/10 pointer-events-none" draggable="false">
         </div>
         <button onclick="nextPhoto()" class="absolute right-2 md:right-6 text-white text-4xl md:text-6xl hover:text-blue-400 transition-all p-4 z-10">❯</button>
-        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition">✕</button>
+        <button onclick="closeLightbox()" class="absolute top-6 right-6 text-white text-4xl hover:text-red-400 transition z-[70]">✕</button>
     </div>
 
     <script>
@@ -285,9 +299,7 @@
         
         let sessions = [], currentPhotos = [], cart = [], currentIndex = 0;
         let isAdmin = false, currentSessionId = null, currentPrice = 20;
-
-        let webUploads = [];
-        let origUploads = [];
+        let webUploads = [], origUploads = [];
 
         function showPage(pageId) {
             ['landing-page', 'sessions-page', 'packs-page', 'contact-page', 'success-page', 'cancel-page'].forEach(id => document.getElementById(id).classList.add('hidden'));
@@ -403,7 +415,7 @@
             if (!error) { document.getElementById('new-loc').value = ''; loadSessions(); }
         }
 
-        async function deleteSession(id) { if (confirm("Are you sure?")) { await client.from('sessions').delete().eq('id', id); loadSessions(); } }
+        async function deleteSession(id) { if (confirm("Are you sure you want to delete this session?")) { await client.from('sessions').delete().eq('id', id); loadSessions(); } }
 
         async function openGallery(id, title, price) {
             currentSessionId = id; currentPrice = price || 20;
@@ -431,7 +443,7 @@
                 
                 return `
                 <div class="relative group rounded-xl overflow-hidden aspect-[4/5] border shadow-sm select-none" oncontextmenu="return false;">
-                    <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 pointer-events-none" draggable="false">
+                    <img src="${p.url_watermarked}" class="w-full h-full object-cover transition duration-500 group-hover:scale-105 cursor-pointer pointer-events-none" draggable="false">
                     
                     <div class="absolute inset-0 z-0 cursor-pointer" onclick="openLightbox(${i})"></div>
                     <div class="absolute top-3 left-3 z-10">
@@ -446,7 +458,7 @@
         }
 
         async function setAsCover(url) { await client.from('sessions').update({ cover_url: url }).eq('id', currentSessionId); alert("Cover updated!"); }
-        async function deletePhoto(id) { if(confirm("Delete?")) { await client.from('photos').delete().eq('id', id); loadPhotos(); } }
+        async function deletePhoto(id) { if(confirm("Delete this photo?")) { await client.from('photos').delete().eq('id', id); loadPhotos(); } }
 
         function handleWebFiles(e) { 
             webUploads = Array.from(e.target.files); 
@@ -530,6 +542,24 @@
             updateCartUI();
         }
 
+        /* LÓGICA DEL CHECKBOX EN EL LIGHTBOX */
+        function toggleCartFromLightbox() {
+            const p = currentPhotos[currentIndex];
+            const isChecked = document.getElementById('lightbox-checkbox').checked;
+            
+            if (isChecked) {
+                // Previene duplicados si se hace clic rápido
+                if(!cart.some(c => c.url === p.url_watermarked)) {
+                    cart.push({url: p.url_watermarked, url_orig: p.url_original || p.url_watermarked, price: currentPrice});
+                }
+            } else {
+                cart = cart.filter(c => c.url !== p.url_watermarked);
+            }
+            
+            updateCartUI();
+            loadPhotos(); // Refresca la cuadrícula de fondo para que el check también aparezca ahí
+        }
+
         function toggleCartModal() { document.getElementById('cart-modal').classList.toggle('hidden'); }
 
         function updateCartUI() {
@@ -538,7 +568,6 @@
                 <div class="flex items-center gap-4 bg-gray-50 p-3 rounded-xl border border-gray-100 select-none" oncontextmenu="return false;">
                     <div class="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
                         <img src="${c.url}" class="w-full h-full object-cover pointer-events-none" draggable="false">
-                        
                     </div>
                     <div class="flex-grow">
                         <p class="text-[10px] text-gray-400 font-bold uppercase">Photo</p>
@@ -568,7 +597,16 @@
             window.currentFinalPrice = finalAmount;
         }
 
-        function removeFromCart(url) { cart = cart.filter(c => c.url !== url); updateCartUI(); if(currentSessionId) loadPhotos(); }
+        function removeFromCart(url) { 
+            cart = cart.filter(c => c.url !== url); 
+            updateCartUI(); 
+            if(currentSessionId) loadPhotos(); 
+
+            // Actualizar checkbox del lightbox si está abierto y es la misma foto
+            if(!document.getElementById('lightbox').classList.contains('hidden') && currentPhotos[currentIndex].url_watermarked === url) {
+                document.getElementById('lightbox-checkbox').checked = false;
+            }
+        }
 
         async function checkout() {
             if(!cart.length) return alert("Your cart is empty.");
@@ -592,11 +630,19 @@
             }
         }
 
+        /* LÓGICA DE ACTUALIZACIÓN VISUAL DEL LIGHTBOX */
+        function updateLightbox() {
+            document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; 
+            
+            // Revisa si la foto actual está en el carrito para marcar/desmarcar el checkbox
+            const isSelected = cart.some(c => c.url === currentPhotos[currentIndex].url_watermarked);
+            document.getElementById('lightbox-checkbox').checked = isSelected;
+        }
+
         function openLightbox(i) { currentIndex = i; updateLightbox(); document.getElementById('lightbox').classList.remove('hidden'); }
         function closeLightbox() { document.getElementById('lightbox').classList.add('hidden'); }
         function nextPhoto() { currentIndex = (currentIndex + 1) % currentPhotos.length; updateLightbox(); }
         function prevPhoto() { currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length; updateLightbox(); }
-        function updateLightbox() { document.getElementById('lightbox-img').src = currentPhotos[currentIndex].url_watermarked; }
 
         async function loadPacks() {
             const { data } = await client.from('packs').select('*').order('id');
@@ -649,4 +695,3 @@
     </script>
 </body>
 </html>
-
